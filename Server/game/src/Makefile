@@ -19,7 +19,8 @@ LIBS = -pthread -lm -lmd
 CXXFLAGS = -std=c++17
 CFLAGS = -g -Wall -O2 -pipe -fexceptions -D_THREAD_SAFE -DNDEBUG -Wno-invalid-source-encoding
 
-ifneq ($(MYSQL_VERSION), 5)
+# pour les versions 5.x.x le numero de version est 14
+ifneq ($(MYSQL_VERSION), 14)
 CFLAGS += -D__MYSQL_USE_SHA1__
 endif
 
