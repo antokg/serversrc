@@ -558,7 +558,7 @@ void CClientManager::RESULT_SAFEBOX_LOAD(CPeer * pkPeer, SQLMsg * msg)
 
 		char szQuery[512];
 		snprintf(szQuery, sizeof(szQuery), 
-				"SELECT id, window+0, pos, count, vnum, socket0, socket1, socket2, "
+				"SELECT id, `window`+0, pos, count, vnum, socket0, socket1, socket2, "
 				"attrtype0, attrvalue0, "
 				"attrtype1, attrvalue1, "
 				"attrtype2, attrvalue2, "
@@ -566,7 +566,7 @@ void CClientManager::RESULT_SAFEBOX_LOAD(CPeer * pkPeer, SQLMsg * msg)
 				"attrtype4, attrvalue4, "
 				"attrtype5, attrvalue5, "
 				"attrtype6, attrvalue6 "
-				"FROM item%s WHERE owner_id=%d AND window='%s'",
+				"FROM item%s WHERE owner_id=%d AND `window`='%s'",
 				GetTablePostfix(), pi->account_id, pi->ip[0] == 0 ? "SAFEBOX" : "MALL");
 
 		pi->account_index = 1;
@@ -750,7 +750,7 @@ void CClientManager::RESULT_SAFEBOX_LOAD(CPeer * pkPeer, SQLMsg * msg)
 						}
 
 						snprintf(szQuery, sizeof(szQuery), 
-								"INSERT INTO item%s (id, owner_id, window, pos, vnum, count, socket0, socket1, socket2) "
+								"INSERT INTO item%s (id, owner_id, `window`, pos, vnum, count, socket0, socket1, socket2) "
 								"VALUES(%u, %u, '%s', %d, %u, %u, %u, %u, %u)",
 								GetTablePostfix(),
 								GainItemID(),
@@ -1270,7 +1270,7 @@ void CClientManager::QUERY_ITEM_SAVE(CPeer * pkPeer, const char * c_pData)
 		char szQuery[512];
 
 		snprintf(szQuery, sizeof(szQuery), 
-			"REPLACE INTO item%s (id, owner_id, window, pos, count, vnum, socket0, socket1, socket2, "
+			"REPLACE INTO item%s (id, owner_id, `window`, pos, count, vnum, socket0, socket1, socket2, "
 			"attrtype0, attrvalue0, "
 			"attrtype1, attrvalue1, "
 			"attrtype2, attrvalue2, "

@@ -133,7 +133,11 @@ void CInputAuth::Login(LPDESC d, const char * c_pData)
 	else
 	{
 		DBManager::instance().ReturnQuery(QID_AUTH_LOGIN, dwKey, p, 
-				"SELECT PASSWORD('%s'),password,social_id,id,status,availDt - NOW() > 0,"
+#ifdef __MYSQL_USE_SHA1__
+					"SELECT SHA1('%s'),password,social_id,id,status,availDt - NOW() > 0,"
+#else
+					"SELECT PASSWORD('%s'),password,social_id,id,status,availDt - NOW() > 0,"
+#endif
 				"UNIX_TIMESTAMP(silver_expire),"
 				"UNIX_TIMESTAMP(gold_expire),"
 				"UNIX_TIMESTAMP(safebox_expire),"
