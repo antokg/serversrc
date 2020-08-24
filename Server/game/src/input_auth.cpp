@@ -133,8 +133,8 @@ void CInputAuth::Login(LPDESC d, const char * c_pData)
 	else
 	{
 		DBManager::instance().ReturnQuery(QID_AUTH_LOGIN, dwKey, p, 
-#ifdef __MYSQL_USE_SHA1__
-					"SELECT SHA1('%s'),password,social_id,id,status,availDt - NOW() > 0,"
+#ifdef __MYSQL_USE_SHA256__
+					"SELECT SHA2('%s', 256),password,social_id,id,status,availDt - NOW() > 0,"
 #else
 					"SELECT PASSWORD('%s'),password,social_id,id,status,availDt - NOW() > 0,"
 #endif
