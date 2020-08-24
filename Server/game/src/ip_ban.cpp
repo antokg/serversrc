@@ -175,7 +175,7 @@ bool LoadBanIP(const char * filename)
 
 		IP ip(start, end);
 
-		itertype(mapBanIP) it = mapBanIP.find(ip.hash());
+		const auto it = mapBanIP.find(ip.hash());
 
 		if (it == mapBanIP.end())
 		{
@@ -196,15 +196,13 @@ bool IsBanIP(struct in_addr in)
 {
 	IP ip(in);
 
-	itertype(mapBanIP) it = mapBanIP.find(ip.hash());
+	const auto it = mapBanIP.find(ip.hash());
 
 	if (it == mapBanIP.end())
 		return false;
 
-	itertype(it->second) it2 = it->second.begin();
-
-	while (it2 != it->second.end())
-		if (ip.IsChildOf(*(it2++)))
+	for (auto& it2 : it->second)
+		if (ip.IsChildOf(it2))
 			return true;
 
 	return false;

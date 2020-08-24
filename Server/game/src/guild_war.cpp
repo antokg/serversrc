@@ -38,10 +38,8 @@ void CGuild::GuildWarPacket(DWORD dwOppGID, BYTE bWarType, BYTE bWarState)
 	pack2.bWarState	= bWarState;
 	pack2.bType		= bWarType;
 
-	for (itertype(m_memberOnline) it = m_memberOnline.begin(); it != m_memberOnline.end(); ++it)
+	for (const auto& ch : m_memberOnline)
 	{
-		LPCHARACTER ch = *it;
-
 		if (bWarState == GUILD_WAR_ON_WAR)
 			ch->ChatPacket(CHAT_TYPE_INFO, LC_TEXT("<길드> 길드전중에는 사냥에 따른 이익이 없습니다."));
 
@@ -76,18 +74,18 @@ void CGuild::SendEnemyGuild(LPCHARACTER ch)
 	p.subheader = GUILD_SUBHEADER_GC_WAR_SCORE;
 	p.size = sizeof(p) + sizeof(DWORD) + sizeof(DWORD) + sizeof(int);
 
-	for (itertype(m_EnemyGuild) it = m_EnemyGuild.begin(); it != m_EnemyGuild.end(); ++it)
+	for (const auto& it : m_EnemyGuild)
 	{
-		ch->SendGuildName( it->first );
+		ch->SendGuildName( it.first );
 
-		pack2.dwGuildOpp = it->first;
-		pack2.bType = it->second.type;
-		pack2.bWarState = it->second.state;
+		pack2.dwGuildOpp = it.first;
+		pack2.bType = it.second.type;
+		pack2.bWarState = it.second.state;
 
 		d->BufferedPacket(&pack, sizeof(pack));
 		d->Packet(&pack2, sizeof(pack2));
 
-		if (it->second.state == GUILD_WAR_ON_WAR)
+		if (it.second.state == GUILD_WAR_ON_WAR)
 		{
 			int iScore;
 
@@ -116,13 +114,13 @@ int CGuild::GetGuildWarState(DWORD dwOppGID)
 	if (dwOppGID == GetID())
 		return GUILD_WAR_NONE;
 
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 	return (it != m_EnemyGuild.end()) ? (it->second.state) : GUILD_WAR_NONE;
 } 
 
 int CGuild::GetGuildWarType(DWORD dwOppGID)
 {
-	itertype(m_EnemyGuild) git = m_EnemyGuild.find(dwOppGID);
+	const auto git = m_EnemyGuild.find(dwOppGID);
 
 	if (git == m_EnemyGuild.end())
 		return GUILD_WAR_TYPE_FIELD;
@@ -132,7 +130,7 @@ int CGuild::GetGuildWarType(DWORD dwOppGID)
 
 DWORD CGuild::GetGuildWarMapIndex(DWORD dwOppGID)
 {
-	itertype(m_EnemyGuild) git = m_EnemyGuild.find(dwOppGID);
+	const auto git = m_EnemyGuild.find(dwOppGID);
 
 	if (git == m_EnemyGuild.end())
 		return 0;
@@ -157,20 +155,20 @@ bool CGuild::UnderWar(DWORD dwOppGID)
 	if (dwOppGID == GetID())
 		return false;
 
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 	return (it != m_EnemyGuild.end()) && (it->second.IsWarBegin());
 } 
 
 DWORD CGuild::UnderAnyWar(BYTE bType)
 {
-	for (itertype(m_EnemyGuild) it = m_EnemyGuild.begin(); it != m_EnemyGuild.end(); ++it)
+	for (const auto& it : m_EnemyGuild)
 	{
 		if (bType < GUILD_WAR_TYPE_MAX_NUM)
-			if (it->second.type != bType)
+			if (it.second.type != bType)
 				continue;
 
-		if (it->second.IsWarBegin())
-			return it->first;
+		if (it.second.IsWarBegin())
+			return it.first;
 	}
 
 	return 0;
@@ -181,7 +179,7 @@ void CGuild::SetWarScoreAgainstTo(DWORD dwOppGID, int iScore)
 	DWORD dwSelfGID = GetID();
 
 	sys_log(0, "GuildWarScore Set %u from %u %d", dwSelfGID, dwOppGID, iScore);
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it != m_EnemyGuild.end())
 	{
@@ -222,7 +220,7 @@ void CGuild::SetWarScoreAgainstTo(DWORD dwOppGID, int iScore)
 
 int CGuild::GetWarScoreAgainstTo(DWORD dwOppGID)
 {
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it != m_EnemyGuild.end())
 	{
@@ -239,7 +237,7 @@ DWORD CGuild::GetWarStartTime(DWORD dwOppGID)
 	if (dwOppGID == GetID())
 		return 0;
 
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it == m_EnemyGuild.end())
 		return 0;
@@ -304,7 +302,7 @@ void CGuild::RequestDeclareWar(DWORD dwOppGID, BYTE type)
 		return;
 	}
 
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 	if (it == m_EnemyGuild.end())
 	{
 		if (!GuildWar_IsWarMap(type))
@@ -405,7 +403,7 @@ bool CGuild::DeclareWar(DWORD dwOppGID, BYTE type, BYTE state)
 
 bool CGuild::CheckStartWar(DWORD dwOppGID)
 {
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it == m_EnemyGuild.end())
 		return false;
@@ -420,7 +418,7 @@ bool CGuild::CheckStartWar(DWORD dwOppGID)
 
 void CGuild::StartWar(DWORD dwOppGID)
 {
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it == m_EnemyGuild.end())
 		return;
@@ -449,7 +447,7 @@ bool CGuild::WaitStartWar(DWORD dwOppGID)
 	}
 
 	//상대방 길드 TGuildWar 를 얻어온다.
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 	if (it == m_EnemyGuild.end())
 	{
 		sys_log(0 ,"GuildWar.WaitStartWar.UNKNOWN_ENEMY id(%u -> %u)", GetID(), dwOppGID);
@@ -542,7 +540,7 @@ void CGuild::RequestRefuseWar(DWORD dwOppGID)
 	if (dwOppGID == GetID())
 		return;
 
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it != m_EnemyGuild.end() && it->second.state == GUILD_WAR_RECV_DECLARE)
 	{
@@ -561,7 +559,7 @@ void CGuild::RefuseWar(DWORD dwOppGID)
 	if (dwOppGID == GetID())
 		return;
 
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it != m_EnemyGuild.end() && (it->second.state == GUILD_WAR_SEND_DECLARE || it->second.state == GUILD_WAR_RECV_DECLARE))
 	{
@@ -577,7 +575,7 @@ void CGuild::ReserveWar(DWORD dwOppGID, BYTE type)
 	if (dwOppGID == GetID())
 		return;
 
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it == m_EnemyGuild.end())
 	{
@@ -596,7 +594,7 @@ void CGuild::EndWar(DWORD dwOppGID)
 	if (dwOppGID == GetID())
 		return;
 
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it != m_EnemyGuild.end())
 	{
@@ -610,9 +608,8 @@ void CGuild::EndWar(DWORD dwOppGID)
 
 		if (!UnderAnyWar())
 		{
-			for (itertype(m_memberOnline) it = m_memberOnline.begin(); it != m_memberOnline.end(); ++it)
+			for (const auto& ch : m_memberOnline)
 			{
-				LPCHARACTER ch = *it;
 				ch->RemoveAffect(GUILD_SKILL_BLOOD);
 				ch->RemoveAffect(GUILD_SKILL_BLESS);
 				ch->RemoveAffect(GUILD_SKILL_SEONGHWI);
@@ -628,7 +625,7 @@ void CGuild::EndWar(DWORD dwOppGID)
 
 void CGuild::SetGuildWarMapIndex(DWORD dwOppGID, long lMapIndex)
 {
-	itertype(m_EnemyGuild) it = m_EnemyGuild.find(dwOppGID);
+	const auto it = m_EnemyGuild.find(dwOppGID);
 
 	if (it == m_EnemyGuild.end())
 		return;
@@ -639,7 +636,7 @@ void CGuild::SetGuildWarMapIndex(DWORD dwOppGID, long lMapIndex)
 
 void CGuild::GuildWarEntryAccept(DWORD dwOppGID, LPCHARACTER ch)
 {
-	itertype(m_EnemyGuild) git = m_EnemyGuild.find(dwOppGID);
+	const auto git = m_EnemyGuild.find(dwOppGID);
 
 	if (git == m_EnemyGuild.end())
 		return;
@@ -672,7 +669,7 @@ void CGuild::GuildWarEntryAccept(DWORD dwOppGID, LPCHARACTER ch)
 
 void CGuild::GuildWarEntryAsk(DWORD dwOppGID)
 {
-	itertype(m_EnemyGuild) git = m_EnemyGuild.find(dwOppGID);
+	const auto git = m_EnemyGuild.find(dwOppGID);
 	if (git == m_EnemyGuild.end())
 	{
 		sys_err("GuildWar.GuildWarEntryAsk.UNKNOWN_ENEMY(%d)", dwOppGID);
@@ -697,12 +694,8 @@ void CGuild::GuildWarEntryAsk(DWORD dwOppGID)
 
 	sys_log(0, "GuildWar.GuildWarEntryAsk.OnlineMemberCount(%d)", m_memberOnline.size());
 
-	itertype(m_memberOnline) it = m_memberOnline.begin();
-
-	while (it != m_memberOnline.end())
+	for (const auto& ch :  m_memberOnline)
 	{
-		LPCHARACTER ch = *it++;
-
 		using namespace quest;
 		unsigned int questIndex=CQuestManager::instance().GetQuestIndexByName("guild_war_join");
 		if (questIndex)
@@ -728,9 +721,8 @@ void CGuild::SetLadderPoint(int point)
 	{
 		char buf[256];
 		snprintf(buf, sizeof(buf), LC_TEXT("<길드> 래더 점수가 %d 점이 되었습니다"), point);
-		for (itertype(m_memberOnline) it = m_memberOnline.begin(); it!=m_memberOnline.end();++it)
+		for (const auto& ch : m_memberOnline)
 		{
-			LPCHARACTER ch = (*it);
 			ch->ChatPacket(CHAT_TYPE_INFO, buf);
 		}
 	}

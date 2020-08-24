@@ -193,12 +193,9 @@ static void FN_add_adminpageIP(char *line)
 
 static void FN_log_adminpage()
 {
-	itertype(g_stAdminPageIP) iter = g_stAdminPageIP.begin();
-
-	while (iter != g_stAdminPageIP.end())
+	for (const auto& iter : g_stAdminPageIP)
 	{
-		dev_log(LOG_DEB0, "ADMIN_PAGE_IP = %s", (*iter).c_str());
-		++iter;
+		dev_log(LOG_DEB0, "ADMIN_PAGE_IP = %s", iter.c_str());
 	}
 
 	dev_log(LOG_DEB0, "ADMIN_PAGE_PASSWORD = %s", g_stAdminPagePassword.c_str());

@@ -325,11 +325,9 @@ CLand::~CLand()
 
 void CLand::Destroy()
 {
-	itertype(m_map_pkObject) it = m_map_pkObject.begin();
-
-	while (it != m_map_pkObject.end())
+	for (const auto& it : m_map_pkObject)
 	{
-		LPOBJECT pkObj = (it++)->second;
+		LPOBJECT pkObj = it.second;
 		CManager::instance().UnregisterObject(pkObj);
 		M2_DELETE(pkObj);
 	}
@@ -637,10 +635,9 @@ CManager::~CManager()
 
 void CManager::Destroy()
 {
-	itertype(m_map_pkLand) it = m_map_pkLand.begin();
-	for ( ; it != m_map_pkLand.end(); ++it) {
-		M2_DELETE(it->second);
-	}
+	for (const auto& it : m_map_pkLand)
+		M2_DELETE(it.second);
+	
 	m_map_pkLand.clear();
 }
 
@@ -680,7 +677,7 @@ bool CManager::LoadObjectProto(const TObjectProto * pProto, int size) // from DB
 
 TObjectProto * CManager::GetObjectProto(DWORD dwVnum)
 {
-	itertype(m_map_pkObjectProto) it = m_map_pkObjectProto.find(dwVnum);
+	const auto it = m_map_pkObjectProto.find(dwVnum);
 
 	if (it == m_map_pkObjectProto.end())
 		return NULL;
@@ -720,8 +717,6 @@ void CManager::UpdateLand(TLand * pTable)
 
 	const DESC_MANAGER::DESC_SET & cont = DESC_MANAGER::instance().GetClientSet();
 
-	itertype(cont) it = cont.begin();
-
 	TPacketGCLandList p;
 
 	p.header = HEADER_GC_LAND_LIST;
@@ -739,10 +734,9 @@ void CManager::UpdateLand(TLand * pTable)
 	sys_log(0, "BUILDING: UpdateLand %u pos %dx%d guild %u", e.dwID, e.x, e.y, e.dwGuildID);
 
 	CGuild *guild = CGuildManager::instance().FindGuild(pTable->dwGuildID);
-	while (it != cont.end())
+	
+	for (const auto& d : cont)
 	{
-		LPDESC d = *(it++);
-
 		if (d->GetCharacter() && d->GetCharacter()->GetMapIndex() == pTable->lMapIndex)
 		{
 			// we must send the guild name first
@@ -776,11 +770,9 @@ CLand * CManager::FindLand(long lMapIndex, long x, long y)
 	x -= r->sx;
 	y -= r->sy;
 
-	itertype(m_map_pkLand) it = m_map_pkLand.begin();
-
-	while (it != m_map_pkLand.end())
+	for (const auto& it : m_map_pkLand)
 	{
-		CLand * pkLand = (it++)->second;
+		CLand * pkLand = it.second;
 		const TLand & r = pkLand->GetData();
 
 		if (r.lMapIndex != lMapIndex)
@@ -800,11 +792,9 @@ CLand * CManager::FindLand(long lMapIndex, long x, long y)
 
 CLand * CManager::FindLandByGuild(DWORD GID)
 {
-	itertype(m_map_pkLand) it = m_map_pkLand.begin();
-
-	while (it != m_map_pkLand.end())
+	for (const auto& it : m_map_pkLand)
 	{
-		CLand * pkLand = (it++)->second;
+		CLand * pkLand = it.second;
 
 		if (pkLand->GetData().dwGuildID == GID)
 			return pkLand;
@@ -866,11 +856,9 @@ bool CManager::LoadObject(TObject * pTable, bool isBoot) // from DB
 
 void CManager::FinalizeBoot()
 {
-	itertype(m_map_pkObjByID) it = m_map_pkObjByID.begin();
-
-	while (it != m_map_pkObjByID.end())
+	for (const auto& it : m_map_pkObjByID)
 	{
-		LPOBJECT pkObj = (it++)->second;
+		LPOBJECT pkObj = it.second;
 
 		pkObj->Show(pkObj->GetMapIndex(), pkObj->GetX(), pkObj->GetY());
 		// BUILDING_NPC
@@ -883,11 +871,9 @@ void CManager::FinalizeBoot()
 	sys_log(0, "FinalizeBoot");
 	// END_OF_BUILDING_NPC
 
-	itertype(m_map_pkLand) it2 = m_map_pkLand.begin();
-
-	while (it2 != m_map_pkLand.end())
+	for (const auto& it2 : m_map_pkLand)
 	{
-		CLand * pkLand = (it2++)->second;
+		CLand * pkLand = it2.second;
 
 		const TLand & r = pkLand->GetData();
 
@@ -913,7 +899,7 @@ void CManager::DeleteObject(DWORD dwID) // from DB
 {
 	sys_log(0, "OBJ_DEL: %u", dwID);
 
-	itertype(m_map_pkObjByID) it = m_map_pkObjByID.find(dwID);
+	const auto it = m_map_pkObjByID.find(dwID);
 
 	if (it == m_map_pkObjByID.end())
 		return;
@@ -923,7 +909,7 @@ void CManager::DeleteObject(DWORD dwID) // from DB
 
 LPOBJECT CManager::FindObjectByVID(DWORD dwVID)
 {
-	itertype(m_map_pkObjByVID) it = m_map_pkObjByVID.find(dwVID);
+	const auto it = m_map_pkObjByVID.find(dwVID);
 
 	if (it == m_map_pkObjByVID.end())
 		return NULL;
@@ -945,11 +931,9 @@ void CManager::SendLandList(LPDESC d, long lMapIndex)
 
 	WORD wCount = 0;
 
-	itertype(m_map_pkLand) it = m_map_pkLand.begin();
-
-	while (it != m_map_pkLand.end())
+	for (const auto& it : m_map_pkLand)
 	{
-		CLand * pkLand = (it++)->second;
+		CLand * pkLand = it.second;
 		const TLand & r = pkLand->GetData();
 
 		if (r.lMapIndex != lMapIndex)
@@ -1022,12 +1006,9 @@ void CManager::ClearLandByGuildID(DWORD dwGuildID)
 
 void CLand::ClearLand()
 {
-	itertype(m_map_pkObject) iter = m_map_pkObject.begin();
-
-	while ( iter != m_map_pkObject.end() )
+	for (const auto& iter : m_map_pkObject)
 	{
-		RequestDeleteObject(iter->second->GetID());
-		iter++;
+		RequestDeleteObject(iter.second->GetID());
 	}
 
 	SetOwner(0);
@@ -1142,12 +1123,10 @@ bool CLand::RequestCreateWall(long nMapIndex, float rot)
 
 void CLand::RequestDeleteWall()
 {
-	itertype(m_map_pkObject) iter = m_map_pkObject.begin();
-
-	while (iter != m_map_pkObject.end())
+	for (const auto& iter : m_map_pkObject)
 	{
-		unsigned id   = iter->second->GetID();
-		unsigned vnum = iter->second->GetVnum();
+		unsigned id   = iter.second->GetID();
+		unsigned vnum = iter.second->GetVnum();
 
 		switch (vnum)
 		{
@@ -1167,7 +1146,6 @@ void CLand::RequestDeleteWall()
 
 		}
 
-		iter++;
 	}
 }
 
@@ -1247,22 +1225,19 @@ bool CLand::RequestCreateWallBlocks(DWORD dwVnum, long nMapIndex, char wallSize,
 
 void CLand::RequestDeleteWallBlocks(DWORD dwID)
 {
-	itertype(m_map_pkObject) iter = m_map_pkObject.begin();
-
 	DWORD corner = dwID - 4;
 	DWORD wall = dwID - 3;
 	DWORD door = dwID - 1;
 	DWORD dwVnum = 0;
 
-	while ( iter != m_map_pkObject.end() )
+	for(const auto& iter : m_map_pkObject)
 	{
-		dwVnum = iter->second->GetVnum();
+		dwVnum = iter.second->GetVnum();
 
 		if ( dwVnum == corner || dwVnum == wall || dwVnum == door )
 		{
-			RequestDeleteObject(iter->second->GetID());
+			RequestDeleteObject(iter.second->GetID());
 		}
-		iter++;
 	}
 }
 // END_BUILD_WALL

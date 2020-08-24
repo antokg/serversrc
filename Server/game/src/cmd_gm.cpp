@@ -3219,12 +3219,8 @@ ACMD(do_affect_remove)
 
 		const std::list<CAffect *> & cont = tch->GetAffectContainer();
 
-		itertype(cont) it = cont.begin();
-
-		while (it != cont.end())
+		for (const auto& pkAff : cont)
 		{
-			CAffect * pkAff = *it++;
-
 			ch->ChatPacket(CHAT_TYPE_INFO, "%4d %5d %5d %8d %u", 
 					pkAff->dwType, pkAff->bApplyOn, pkAff->lApplyValue, pkAff->lDuration, pkAff->dwFlag);
 		}

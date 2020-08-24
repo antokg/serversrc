@@ -52,12 +52,8 @@ void SendAffectAddPacket(LPDESC d, CAffect * pkAff)
 // Affect
 CAffect * CHARACTER::FindAffect(DWORD dwType, BYTE bApply) const
 {
-	itertype(m_list_pkAffect) it = m_list_pkAffect.begin();
-
-	while (it != m_list_pkAffect.end())
+	for (const auto& pkAffect : m_list_pkAffect)
 	{
-		CAffect * pkAffect = *it++;
-
 		if (pkAffect->dwType == dwType && (bApply == APPLY_NONE || bApply == pkAffect->bApplyOn))
 			return pkAffect;
 	}
@@ -183,9 +179,7 @@ void CHARACTER::ClearAffect(bool bSave)
 	WORD	wMovSpd = GetPoint(POINT_MOV_SPEED);
 	WORD	wAttSpd = GetPoint(POINT_ATT_SPEED);
 
-	itertype(m_list_pkAffect) it = m_list_pkAffect.begin();
-
-	while (it != m_list_pkAffect.end())
+	for (auto it = m_list_pkAffect.cbegin() ; it != m_list_pkAffect.cend();)
 	{
 		CAffect * pkAff = *it;
 
@@ -275,11 +269,7 @@ int CHARACTER::ProcessAffect()
 	int lMovSpd = GetPoint(POINT_MOV_SPEED);
 	int lAttSpd = GetPoint(POINT_ATT_SPEED);
 
-	itertype(m_list_pkAffect) it;
-
-	it = m_list_pkAffect.begin();
-
-	while (it != m_list_pkAffect.end())
+	for (auto it = m_list_pkAffect.cbegin(); it != m_list_pkAffect.cend(); )
 	{
 		pkAff = *it;
 
@@ -348,12 +338,8 @@ void CHARACTER::SaveAffect()
 {
 	TPacketGDAddAffect p;
 
-	itertype(m_list_pkAffect) it = m_list_pkAffect.begin();
-
-	while (it != m_list_pkAffect.end())
+	for (const auto& pkAff : m_list_pkAffect)
 	{
-		CAffect * pkAff = *it++;
-
 		if (IS_NO_SAVE_AFFECT(pkAff->dwType))
 			continue;
 
@@ -630,11 +616,8 @@ bool CHARACTER::AddAffect(DWORD dwType, BYTE bApplyOn, int lApplyValue, DWORD dw
 
 void CHARACTER::RefreshAffect()
 {
-	itertype(m_list_pkAffect) it = m_list_pkAffect.begin();
-
-	while (it != m_list_pkAffect.end())
+	for (const auto& pkAff : m_list_pkAffect)
 	{
-		CAffect * pkAff = *it++;
 		ComputeAffect(pkAff, true);
 	}
 }

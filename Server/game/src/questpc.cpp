@@ -661,13 +661,12 @@ namespace quest
 
 	void PC::Build()
 	{
-		itertype(m_FlagMap) it;
-		for (it = m_FlagMap.begin(); it != m_FlagMap.end(); ++it)
+		for (const auto& it : m_FlagMap)
 		{
-			if (it->first.size()>9 && it->first.compare(it->first.size()-9,9, ".__status") == 0)
+			if (it.first.size()>9 && it.first.compare(it.first.size()-9,9, ".__status") == 0)
 			{
-				DWORD dwQuestIndex = CQuestManager::instance().GetQuestIndexByName(it->first.substr(0, it->first.size()-9));
-				int state = it->second;
+				DWORD dwQuestIndex = CQuestManager::instance().GetQuestIndexByName(it.first.substr(0, it.first.size()-9));
+				int state = it.second;
 				QuestState qs;
 				qs.st = state;
 
@@ -679,9 +678,9 @@ namespace quest
 	void PC::ClearQuest(const string& quest_name)
 	{
 		string quest_name_with_dot = quest_name + '.';
-		for (itertype(m_FlagMap) it = m_FlagMap.begin(); it!= m_FlagMap.end();)
+		for (auto it = m_FlagMap.begin(); it!= m_FlagMap.end();)
 		{
-			itertype(m_FlagMap) itNow = it++;
+			const auto& itNow = it++;
 			if (itNow->second != 0 && itNow->first.compare(0, quest_name_with_dot.size(), quest_name_with_dot) == 0)
 			{
 				//m_FlagMap.erase(itNow);
@@ -708,17 +707,17 @@ namespace quest
 
 	void PC::SendFlagList(LPCHARACTER ch)
 	{
-		for (itertype(m_FlagMap) it = m_FlagMap.begin(); it!= m_FlagMap.end(); ++it)
+		for (const auto& it : m_FlagMap)
 		{
-			if (it->first.size()>9 && it->first.compare(it->first.size()-9,9, ".__status") == 0)
+			if (it.first.size()>9 && it.first.compare(it.first.size()-9,9, ".__status") == 0)
 			{
-				const string quest_name = it->first.substr(0, it->first.size()-9);
-				const char* state_name = CQuestManager::instance().GetQuestStateName(quest_name, it->second);
-				ch->ChatPacket(CHAT_TYPE_INFO, "%s %s (%d)", quest_name.c_str(), state_name, it->second);
+				const string quest_name = it.first.substr(0, it.first.size()-9);
+				const char* state_name = CQuestManager::instance().GetQuestStateName(quest_name, it.second);
+				ch->ChatPacket(CHAT_TYPE_INFO, "%s %s (%d)", quest_name.c_str(), state_name, it.second);
 			}
 			else
 			{
-				ch->ChatPacket(CHAT_TYPE_INFO, "%s %d", it->first.c_str(), it->second);
+				ch->ChatPacket(CHAT_TYPE_INFO, "%s %d", it.first.c_str(), it.second);
 			}
 		}
 	}

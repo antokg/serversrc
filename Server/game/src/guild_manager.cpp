@@ -186,11 +186,10 @@ CGuild* CGuildManager::FindGuild(DWORD guild_id)
 
 CGuild*	CGuildManager::FindGuildByName(const std::string guild_name)
 {
-	itertype(m_mapGuild) it;
-	for (it = m_mapGuild.begin(); it!=m_mapGuild.end(); ++it)
+	for (const auto& it : m_mapGuild)
 	{
-		if (it->second->GetName()==guild_name)
-			return it->second;
+		if (it.second->GetName()==guild_name)
+			return it.second;
 	}
 	return NULL;
 }
@@ -273,9 +272,9 @@ int CGuildManager::GetRank(CGuild* g)
 	int point = g->GetLadderPoint();
 	int rank = 1;
 
-	for (itertype(m_mapGuild) it = m_mapGuild.begin(); it != m_mapGuild.end();++it)
+	for (const auto& it : m_mapGuild)
 	{
-		CGuild * pg = it->second;
+		CGuild * pg = it.second;
 
 		if (pg->GetLadderPoint() > point)
 			rank++;
@@ -312,10 +311,10 @@ void CGuildManager::GetHighRankString(DWORD dwMyGuild, char * buffer, size_t buf
 	using namespace std;
 	vector<CGuild*> v;
 
-	for (itertype(m_mapGuild) it = m_mapGuild.begin(); it != m_mapGuild.end(); ++it)
+	for (const auto& it : m_mapGuild)
 	{
-		if (it->second)
-			v.push_back(it->second);
+		if (it.second)
+			v.push_back(it.second);
 	}
 
 	std::sort(v.begin(), v.end(), FGuildCompare());
@@ -386,10 +385,10 @@ void CGuildManager::GetAroundRankString(DWORD dwMyGuild, char * buffer, size_t b
 	using namespace std;
 	vector<CGuild*> v;
 
-	for (itertype(m_mapGuild) it = m_mapGuild.begin(); it != m_mapGuild.end(); ++it)
+	for (const auto& it : m_mapGuild)
 	{
-		if (it->second)
-			v.push_back(it->second);
+		if (it.second)
+			v.push_back(it.second);
 	}
 
 	std::sort(v.begin(), v.end(), FGuildCompare());
@@ -774,10 +773,10 @@ void CGuildManager::ReserveWar(DWORD dwGuild1, DWORD dwGuild2, BYTE bType) // fr
 
 void CGuildManager::ShowGuildWarList(LPCHARACTER ch)
 {
-	for (itertype(m_GuildWar) it = m_GuildWar.begin(); it != m_GuildWar.end(); ++it)
+	for (const auto& it : m_GuildWar)
 	{
-		CGuild * A = TouchGuild(it->first);
-		CGuild * B = TouchGuild(it->second);
+		CGuild * A = TouchGuild(it.first);
+		CGuild * B = TouchGuild(it.second);
 
 		if (A && B)
 		{
@@ -801,12 +800,10 @@ void CGuildManager::SendGuildWar(LPCHARACTER ch)
 	p.size = sizeof(p) + (sizeof(DWORD) * 2) * m_GuildWar.size();
 	buf.write(&p, sizeof(p));
 
-	itertype(m_GuildWar) it;
-
-	for (it = m_GuildWar.begin(); it != m_GuildWar.end(); ++it)
+	for (const auto& it : m_GuildWar)
 	{
-		buf.write(&it->first, sizeof(DWORD));
-		buf.write(&it->second, sizeof(DWORD));
+		buf.write(&it.first, sizeof(DWORD));
+		buf.write(&it.second, sizeof(DWORD));
 	}
 
 	ch->GetDesc()->Packet(buf.read_peek(), buf.size());
@@ -856,12 +853,12 @@ void CGuildManager::Kill(LPCHARACTER killer, LPCHARACTER victim)
 
 void CGuildManager::StopAllGuildWar()
 {
-	for (itertype(m_GuildWar) it = m_GuildWar.begin(); it != m_GuildWar.end(); ++it)
+	for (const auto& it : m_GuildWar)
 	{
-		CGuild * g = CGuildManager::instance().TouchGuild(it->first);
-		CGuild * pg = CGuildManager::instance().TouchGuild(it->second);
-		g->EndWar(it->second);
-		pg->EndWar(it->first);
+		CGuild * g = CGuildManager::instance().TouchGuild(it.first);
+		CGuild * pg = CGuildManager::instance().TouchGuild(it.second);
+		g->EndWar(it.second);
+		pg->EndWar(it.first);
 	}
 
 	m_GuildWar.clear();
@@ -869,7 +866,7 @@ void CGuildManager::StopAllGuildWar()
 
 void CGuildManager::ReserveWarAdd(TGuildWarReserve * p)
 {
-	itertype(m_map_kReserveWar) it = m_map_kReserveWar.find(p->dwID);
+	const auto it = m_map_kReserveWar.find(p->dwID);
 
 	CGuildWarReserveForGame * pkReserve;
 
@@ -891,7 +888,7 @@ void CGuildManager::ReserveWarAdd(TGuildWarReserve * p)
 
 void CGuildManager::ReserveWarBet(TPacketGDGuildWarBet * p)
 {
-	itertype(m_map_kReserveWar) it = m_map_kReserveWar.find(p->dwWarID);
+	const auto it = m_map_kReserveWar.find(p->dwWarID);
 
 	if (it == m_map_kReserveWar.end())
 		return;
@@ -901,7 +898,7 @@ void CGuildManager::ReserveWarBet(TPacketGDGuildWarBet * p)
 
 bool CGuildManager::IsBet(DWORD dwID, const char * c_pszLogin)
 {
-	itertype(m_map_kReserveWar) it = m_map_kReserveWar.find(dwID);
+	const auto it = m_map_kReserveWar.find(dwID);
 
 	if (it == m_map_kReserveWar.end())
 		return true;
@@ -912,14 +909,12 @@ bool CGuildManager::IsBet(DWORD dwID, const char * c_pszLogin)
 void CGuildManager::ReserveWarDelete(DWORD dwID)
 {
 	sys_log(0, "ReserveWarDelete %u", dwID);
-	itertype(m_map_kReserveWar) it = m_map_kReserveWar.find(dwID);
+	const auto it = m_map_kReserveWar.find(dwID);
 
 	if (it == m_map_kReserveWar.end())
 		return;
 
-	itertype(m_vec_kReserveWar) it_vec = m_vec_kReserveWar.begin();
-
-	while (it_vec != m_vec_kReserveWar.end())
+	for (auto it_vec = m_vec_kReserveWar.cbegin(); it_vec != m_vec_kReserveWar.end();)
 	{
 		if (*it_vec == it->second)
 		{
@@ -927,7 +922,9 @@ void CGuildManager::ReserveWarDelete(DWORD dwID)
 			break;
 		}
 		else
+		{
 			++it_vec;
+		}
 	}
 
 	M2_DELETE(it->second);

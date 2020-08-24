@@ -459,10 +459,10 @@ int main(int argc, char **argv)
 
 	printf("#1 Diff %u\n", mapDiff.size());
 
-	for (itertype(mapDiff) it = mapDiff.begin(); it != mapDiff.end(); ++it)
+	for (const auto& it : mapDiff)
 	{
-		printf("Put Block pos %u crc %u\n", it->first, it->second->m_crc);
-		mgr.SaveBlockFromCompressedData(0, it->first, it->second->m_abCompBuf, it->second->m_sizeCompBuf);
+		printf("Put Block pos %u crc %u\n", it.first, it.second.m_crc);
+		mgr.SaveBlockFromCompressedData(0, it.first, it.second->m_abCompBuf, it.second.m_sizeCompBuf);
 	}
 
 	mgr.GetBlockCRCList(0, idx_client);

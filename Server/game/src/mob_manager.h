@@ -1,6 +1,8 @@
 #ifndef __INC_METIN_II_MOB_MANAGER_H__
 #define __INC_METIN_II_MOB_MANAGER_H__
 
+#include <algorithm>
+
 typedef struct SMobSplashAttackInfo
 {
 	DWORD	dwTiming; // 스킬 사용 후 실제로 데미지 먹힐때까지 기다리는 시간 (ms)
@@ -75,7 +77,7 @@ class CMobGroupGroup
 
 			// ADD_MOB_GROUP_GROUP_PROB
 			int n = number(1, m_vec_iProbs.back());
-			itertype(m_vec_iProbs) it = lower_bound(m_vec_iProbs.begin(), m_vec_iProbs.end(), n);
+			const auto it = std::lower_bound(m_vec_iProbs.begin(), m_vec_iProbs.end(), n);
 
 			return m_vec_dwMemberVnum[std::distance(m_vec_iProbs.begin(), it)];
 			// END_OF_ADD_MOB_GROUP_GROUP_PROB

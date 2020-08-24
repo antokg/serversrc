@@ -51,9 +51,10 @@ CHARACTER_MANAGER::~CHARACTER_MANAGER()
 
 void CHARACTER_MANAGER::Destroy()
 {
-	itertype(m_map_pkChrByVID) it = m_map_pkChrByVID.begin();
+	auto it = m_map_pkChrByVID.begin();
 	while (it != m_map_pkChrByVID.end()) {
 		LPCHARACTER ch = it->second;
+		// TODO retourner l'iterator pour eviter de re parcourir la map
 		M2_DESTROY_CHARACTER(ch); // m_map_pkChrByVID is changed here
 		it = m_map_pkChrByVID.begin();
 	}
@@ -108,7 +109,7 @@ void CHARACTER_MANAGER::DestroyCharacter(LPCHARACTER ch, const char* file, size_
 		return;
 
 	// <Factor> Check whether it has been already deleted or not.
-	itertype(m_map_pkChrByVID) it = m_map_pkChrByVID.find(ch->GetVID());
+	const auto it = m_map_pkChrByVID.find(ch->GetVID());
 	if (it == m_map_pkChrByVID.end()) {
 		sys_err("[CHARACTER_MANAGER::DestroyCharacter] <Factor> %d not found", (long)(ch->GetVID()));
 		return; // prevent duplicated destrunction
@@ -145,7 +146,7 @@ void CHARACTER_MANAGER::DestroyCharacter(LPCHARACTER ch, const char* file, size_
 
 	if (0 != ch->GetPlayerID())
 	{
-		itertype(m_map_pkChrByPID) it = m_map_pkChrByPID.find(ch->GetPlayerID());
+		const auto it = m_map_pkChrByPID.find(ch->GetPlayerID());
 
 		if (m_map_pkChrByPID.end() != it)
 		{
@@ -170,7 +171,7 @@ void CHARACTER_MANAGER::DestroyCharacter(LPCHARACTER ch, const char* file, size_
 
 LPCHARACTER CHARACTER_MANAGER::Find(DWORD dwVID)
 {
-	itertype(m_map_pkChrByVID) it = m_map_pkChrByVID.find(dwVID);
+	const auto it = m_map_pkChrByVID.find(dwVID);
 
 	if (m_map_pkChrByVID.end() == it)
 		return NULL;
@@ -196,7 +197,7 @@ LPCHARACTER CHARACTER_MANAGER::Find(const VID & vid)
 
 LPCHARACTER CHARACTER_MANAGER::FindByPID(DWORD dwPID)
 {
-	itertype(m_map_pkChrByPID) it = m_map_pkChrByPID.find(dwPID);
+	const auto it = m_map_pkChrByPID.find(dwPID);
 
 	if (m_map_pkChrByPID.end() == it)
 		return NULL;
@@ -699,8 +700,8 @@ void CHARACTER_MANAGER::Update(int iPulse)
 	// 1시간에 한번씩 몹 사냥 개수 기록 
 	if (0 == (iPulse % PASSES_PER_SEC(3600)))
 	{
-		for (itertype(m_map_dwMobKillCount) it = m_map_dwMobKillCount.begin(); it != m_map_dwMobKillCount.end(); ++it)
-			DBManager::instance().SendMoneyLog(MONEY_LOG_MONSTER_KILL, it->first, it->second);
+		for (const auto& it : m_map_dwMobKillCount)
+			DBManager::instance().SendMoneyLog(MONEY_LOG_MONSTER_KILL, it.first, it.second);
 			
 		m_map_dwMobKillCount.clear();
 	}
@@ -781,12 +782,8 @@ void CHARACTER_MANAGER::UnregisterForMonsterLog(LPCHARACTER ch)
 
 void CHARACTER_MANAGER::PacketMonsterLog(LPCHARACTER ch, const void* buf, int size)
 {
-	itertype(m_set_pkChrMonsterLog) it;
-
-	for (it = m_set_pkChrMonsterLog.begin(); it!=m_set_pkChrMonsterLog.end();++it)
+	for (const auto& c : m_set_pkChrMonsterLog)
 	{
-		LPCHARACTER c = *it;
-
 		if (ch && DISTANCE_APPROX(c->GetX()-ch->GetX(), c->GetY()-ch->GetY())>6000)
 			continue;
 
@@ -801,7 +798,7 @@ void CHARACTER_MANAGER::KillLog(DWORD dwVnum)
 {
 	const DWORD SEND_LIMIT = 10000;
 
-	itertype(m_map_dwMobKillCount) it = m_map_dwMobKillCount.find(dwVnum);
+	const auto it = m_map_dwMobKillCount.find(dwVnum);
 
 	if (it == m_map_dwMobKillCount.end())
 		m_map_dwMobKillCount.insert(std::make_pair(dwVnum, 1));
@@ -837,7 +834,7 @@ void CHARACTER_MANAGER::UnregisterRaceNumMap(LPCHARACTER ch)
 {
 	DWORD dwVnum = ch->GetRaceNum();
 
-	itertype(m_map_pkChrByRaceNum) it = m_map_pkChrByRaceNum.find(dwVnum);
+	const auto it = m_map_pkChrByRaceNum.find(dwVnum);
 
 	if (it != m_map_pkChrByRaceNum.end())
 		it->second.erase(ch);
@@ -878,12 +875,11 @@ bool CHARACTER_MANAGER::GetCharactersByRaceNum(DWORD dwRaceNum, CharacterVectorI
 LPCHARACTER CHARACTER_MANAGER::FindSpecifyPC(unsigned int uiJobFlag, long lMapIndex, LPCHARACTER except, int iMinLevel, int iMaxLevel)
 {
 	LPCHARACTER chFind = NULL;
-	itertype(m_map_pkChrByPID) it;
 	int n = 0;
 
-	for (it = m_map_pkChrByPID.begin(); it != m_map_pkChrByPID.end(); ++it)
+	for (const auto& it : m_map_pkChrByPID)
 	{
-		LPCHARACTER ch = it->second;
+		LPCHARACTER ch = it.second;
 
 		if (ch == except)
 			continue;

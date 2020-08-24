@@ -5,6 +5,8 @@
 #include "pool.h"
 #endif
 
+#include <algorithm>
+
 // special_item_group.txt에서 정의하는 속성 그룹
 // type attr로 선언할 수 있다.
 // 이 속성 그룹을 이용할 수 있는 것은 special_item_group.txt에서 Special type으로 정의된 그룹에 속한 UNIQUE ITEM이다.
@@ -114,7 +116,7 @@ class CSpecialItemGroup
 		int GetOneIndex() const
 		{
 			int n = number(1, m_vecProbs.back());
-			itertype(m_vecProbs) it = lower_bound(m_vecProbs.begin(), m_vecProbs.end(), n);
+			const auto it = std::lower_bound(m_vecProbs.begin(), m_vecProbs.end(), n);
 			return std::distance(m_vecProbs.begin(), it);
 		}
 
@@ -149,11 +151,12 @@ class CSpecialItemGroup
 		{
 			if (CSpecialItemGroup::SPECIAL != m_bType)
 				return 0;
-			for (itertype(m_vecItems) it = m_vecItems.begin(); it != m_vecItems.end(); it++)
+			
+			for (const auto& it : m_vecItems)
 			{
-				if (it->vnum == dwVnum)
+				if (it.vnum == dwVnum)
 				{
-					return it->count;
+					return it.count;
 				}
 			}
 			return 0;
@@ -217,7 +220,7 @@ class CMobItemGroup
 		int GetOneIndex() const
 		{
 			int n = number(1, m_vecProbs.back());
-			itertype(m_vecProbs) it = lower_bound(m_vecProbs.begin(), m_vecProbs.end(), n);
+			const auto it = std::lower_bound(m_vecProbs.begin(), m_vecProbs.end(), n);
 			return std::distance(m_vecProbs.begin(), it);
 		}
 		// END_OF_MOB_DROP_ITEM_BUG_FIX
@@ -400,7 +403,12 @@ class ITEM_MANAGER : public singleton<ITEM_MANAGER>
 		const std::vector<TItemTable> & GetTable() { return m_vec_prototype; }
 
 		// CHECK_UNIQUE_GROUP
-		int			GetSpecialGroupFromItem(DWORD dwVnum) const { itertype(m_ItemToSpecialGroup) it = m_ItemToSpecialGroup.find(dwVnum); return (it == m_ItemToSpecialGroup.end()) ? 0 : it->second; }
+		int	GetSpecialGroupFromItem(DWORD dwVnum) const
+		{
+			const auto it = m_ItemToSpecialGroup.find(dwVnum);
+			return (it == m_ItemToSpecialGroup.end()) ? 0 : it->second;
+			
+		}
 		// END_OF_CHECK_UNIQUE_GROUP
 
 	protected:

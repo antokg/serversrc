@@ -168,8 +168,8 @@ class CWarMapManager : public singleton<CWarMapManager>
 
 template <typename Func> Func CWarMapManager::for_each(Func f)
 {
-	for (itertype(m_mapWarMap) it = m_mapWarMap.begin(); it != m_mapWarMap.end(); ++it)
-		f(it->second);
+	for (const auto& it : m_mapWarMap)
+		f(it.second);
 
 	return f;
 }

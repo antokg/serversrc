@@ -297,32 +297,29 @@ void MessengerManager::SendList(MessengerManager::keyA account)
 
 	TEMP_BUFFER buf(128 * 1024); // 128k
 
-	itertype(m_Relation[account]) it = m_Relation[account].begin(), eit = m_Relation[account].end();
-
-	while (it != eit)
+	for (const auto& it : m_Relation[account])
 	{
-		if (m_set_loginAccount.find(*it) != m_set_loginAccount.end())
+		if (m_set_loginAccount.find(it) != m_set_loginAccount.end())
 		{
 			pack_online.connected = 1;
 
 			// Online
-			pack_online.length = it->size();
+			pack_online.length = it.size();
 
 			buf.write(&pack_online, sizeof(TPacketGCMessengerListOnline));
-			buf.write(it->c_str(), it->size());
+			buf.write(it.c_str(), it.size());
 		}
 		else
 		{
 			pack_offline.connected = 0;
 
 			// Offline
-			pack_offline.length = it->size();
+			pack_offline.length = it.size();
 
 			buf.write(&pack_offline, sizeof(TPacketGCMessengerListOffline));
-			buf.write(it->c_str(), it->size());
+			buf.write(it.c_str(), it.size());
 		}
 
-		++it;
 	}
 
 	pack.size += buf.size();

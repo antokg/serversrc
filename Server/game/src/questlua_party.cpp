@@ -45,6 +45,18 @@ namespace quest
 
 		return 1;
 	}
+	
+	int party_get_min_level(lua_State* L)
+	{
+		LPCHARACTER ch = CQuestManager::instance().GetCurrentCharacterPtr();
+
+		if (ch->GetParty())
+			lua_pushnumber(L,ch->GetParty()->GetMemberMinLevel());
+		else
+			lua_pushnumber(L, 1);
+
+		return 1;
+	}
 
     struct FRunCinematicSender
     {
@@ -408,6 +420,7 @@ namespace quest
 			{ "show_cinematic",	party_show_cinematic},
 			{ "run_cinematic",	party_run_cinematic	},
 			{ "get_max_level",	party_get_max_level	},
+			{ "get_min_level",	party_get_min_level	},
 			{ "clear_ready",	party_clear_ready	},
 			{ "is_in_dungeon",	party_is_in_dungeon	},
 			{ "give_buff",		party_give_buff		},

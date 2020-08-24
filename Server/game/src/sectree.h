@@ -139,7 +139,7 @@ class SECTREE
 		}
 		template <class _Func> bool for_each_entity_for_find_victim(_Func & func)
 		{
-			itertype(m_set_entity) it = m_set_entity.begin();
+			auto it = m_set_entity.begin();
 
 			while (it != m_set_entity.end())
 			{
@@ -186,16 +186,19 @@ class SECTREE
 	private:
 		template <class _Func> void for_each_entity(_Func & func)
 		{
-			itertype(m_set_entity) it = m_set_entity.begin();
-			for ( ; it != m_set_entity.end(); ++it) {
+			for (auto it = m_set_entity.cbegin(); it != m_set_entity.cend();) {
 				LPENTITY entity = *it;
 				// <Factor> Sanity check
-				if (entity->GetSectree() != this) {
+				if (entity->GetSectree() != this)
+				{
 					sys_err("<Factor> SECTREE-ENTITY relationship mismatch");
-					m_set_entity.erase(it);
-					continue;
+					it = m_set_entity.erase(it);
 				}
-				func(entity);
+				else
+				{
+					++it;
+					func(entity);
+				}
 			}
 		}
 

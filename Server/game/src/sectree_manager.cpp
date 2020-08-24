@@ -1116,7 +1116,7 @@ void SECTREE_MANAGER::DestroyPrivateMap(long lMapIndex)
 
 TAreaMap& SECTREE_MANAGER::GetDungeonArea(long lMapIndex)
 {
-	itertype(m_map_pkArea) it = m_map_pkArea.find(lMapIndex);
+	const auto it = m_map_pkArea.find(lMapIndex);
 
 	if (it == m_map_pkArea.end())
 	{
@@ -1144,14 +1144,13 @@ void SECTREE_MANAGER::SendNPCPosition(LPCHARACTER ch)
 	TNPCPosition np;
 
 	// TODO m_mapNPCPosition[lMapIndex] 를 보내주세요
-	itertype(m_mapNPCPosition[lMapIndex]) it;
 
-	for (it = m_mapNPCPosition[lMapIndex].begin(); it != m_mapNPCPosition[lMapIndex].end(); ++it)
+	for (const auto& it : m_mapNPCPosition[lMapIndex])
 	{
-		np.bType = it->bType;
-		strlcpy(np.name, it->name, sizeof(np.name));
-		np.x = it->x;
-		np.y = it->y;
+		np.bType = it.bType;
+		strlcpy(np.name, it.name, sizeof(np.name));
+		np.x = it.x;
+		np.y = it.y;
 		buf.write(&np, sizeof(np));
 	}
 

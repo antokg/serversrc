@@ -511,9 +511,9 @@ void CHARACTER::Destroy()
 	event_cancel(&m_pkMiningEvent);
 	// END_OF_MINING
 
-	for (itertype(m_mapMobSkillEvent) it = m_mapMobSkillEvent.begin(); it != m_mapMobSkillEvent.end(); ++it)
+	for (const auto& it : m_mapMobSkillEvent)
 	{
-		LPEVENT pkEvent = it->second;
+		LPEVENT pkEvent = it.second;
 		event_cancel(&pkEvent);
 	}
 	m_mapMobSkillEvent.clear();
@@ -671,10 +671,10 @@ void CHARACTER::OpenMyShop(const char * c_pszSign, TShopItemTable * pTable, BYTE
 		TEMP_BUFFER buf;
 		buf.write(&header, sizeof(header));
 
-		for (itertype(itemkind) it = itemkind.begin(); it != itemkind.end(); ++it)
+		for (const auto& it : itemkind)
 		{
-			info.dwVnum = it->first;
-			info.dwPrice = it->second;
+			info.dwVnum = it.first;
+			info.dwPrice = it.second;
 
 			buf.write(&info, sizeof(info));
 		}
@@ -5922,11 +5922,11 @@ void CHARACTER::SetGuild(CGuild* pGuild)
 
 void CHARACTER::SendGreetMessage()
 {
-	typeof(DBManager::instance().GetGreetMessage()) v = DBManager::instance().GetGreetMessage();
+	const auto v = DBManager::instance().GetGreetMessage();
 
-	for (itertype(v) it = v.begin(); it != v.end(); ++it)
+	for (const auto& it : v)
 	{
-		ChatPacket(CHAT_TYPE_NOTICE, it->c_str());
+		ChatPacket(CHAT_TYPE_NOTICE, it.c_str());
 	}
 }
 

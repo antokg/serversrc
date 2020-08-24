@@ -2970,7 +2970,7 @@ bool CHARACTER::UseMobSkill(unsigned int idx)
 			info->index = i;
 
 			// <Factor> Cancel existing event first
-			itertype(m_mapMobSkillEvent) it = m_mapMobSkillEvent.find(i);
+			const auto it = m_mapMobSkillEvent.find(i);
 			if (it != m_mapMobSkillEvent.end()) {
 				LPEVENT existing = it->second;
 				event_cancel(&existing);

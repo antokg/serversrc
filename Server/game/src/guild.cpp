@@ -16,6 +16,7 @@
 #include "locale_service.h"
 #include "log.h"
 #include "questmanager.h"
+#include <numeric>
 
 	SGuildMember::SGuildMember(LPCHARACTER ch, BYTE grade, DWORD offer_exp)
 : pid(ch->GetPlayerID()), grade(grade), is_general(0), job(ch->GetJob()), level(ch->GetLevel()), offer_exp(offer_exp), name(ch->GetName())
@@ -1372,9 +1373,8 @@ void CGuild::UseSkill(DWORD dwVnum, LPCHARACTER ch, DWORD pid)
 
 				SendDBSkillUpdate(-iNeededSP);
 
-				for (itertype(m_memberOnline) it = m_memberOnline.begin(); it != m_memberOnline.end(); ++it)
+				for (const auto& victim : m_memberOnline)
 				{
-					LPCHARACTER victim = *it;
 					victim->RemoveAffect(dwVnum);
 					ch->ComputeSkill(dwVnum, victim, m_data.abySkill[dwRealVnum]);
 				}
@@ -1692,9 +1692,9 @@ LPCHARACTER CGuild::GetMasterCharacter()
 
 void CGuild::Packet(const void* buf, int size)
 {
-	for (itertype(m_memberOnline) it = m_memberOnline.begin(); it!=m_memberOnline.end();++it)
+	for (const auto& it : m_memberOnline)
 	{
-		LPDESC d = (*it)->GetDesc();
+		LPDESC d = it->GetDesc();
 
 		if (d)
 			d->Packet(buf, size);
@@ -1703,14 +1703,11 @@ void CGuild::Packet(const void* buf, int size)
 
 int CGuild::GetTotalLevel() const
 {
-	int total = 0;
-
-	for (itertype(m_member) it = m_member.begin(); it != m_member.end(); ++it)
-	{
-		total += it->second.level;
-	}
-
-	return total;
+	return std::accumulate(m_member.begin(), m_member.end(), 0, 
+		[] (const auto& i, const auto& p) { 
+			return i + p.second.level;
+		}
+	);
 }
 
 bool CGuild::ChargeSP(LPCHARACTER ch, int iSP)
@@ -1867,9 +1864,8 @@ void CGuild::RecvMoneyChange(int iGold)
 	p.size = sizeof(p) + sizeof(int);
 	p.subheader = GUILD_SUBHEADER_GC_MONEY_CHANGE;
 
-	for (itertype(m_memberOnline) it = m_memberOnline.begin(); it != m_memberOnline.end(); ++it)
+	for (const auto& ch : m_memberOnline)
 	{
-		LPCHARACTER ch = *it;
 		LPDESC d = ch->GetDesc();
 		d->BufferedPacket(&p, sizeof(p));
 		d->Packet(&iGold, sizeof(int));

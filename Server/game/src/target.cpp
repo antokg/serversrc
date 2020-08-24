@@ -155,7 +155,7 @@ void CTargetManager::CreateTarget(DWORD dwPID,
 	if (pkChr->GetMapIndex() != iMapIndex)
 		return;
 
-	itertype(m_map_kListEvent) it = m_map_kListEvent.find(dwPID);
+	const auto it = m_map_kListEvent.find(dwPID);
 
 	if (it != m_map_kListEvent.end())
 	{
@@ -239,7 +239,7 @@ void CTargetManager::CreateTarget(DWORD dwPID,
 
 void CTargetManager::DeleteTarget(DWORD dwPID, DWORD dwQuestIndex, const char * c_pszTargetName)
 {
-	itertype(m_map_kListEvent) it = m_map_kListEvent.find(dwPID);
+	const auto it = m_map_kListEvent.find(dwPID);
 
 	if (it == m_map_kListEvent.end())
 		return;
@@ -283,7 +283,7 @@ void CTargetManager::DeleteTarget(DWORD dwPID, DWORD dwQuestIndex, const char * 
 
 LPEVENT CTargetManager::GetTargetEvent(DWORD dwPID, DWORD dwQuestIndex, const char * c_pszTargetName)
 {
-	itertype(m_map_kListEvent) it = m_map_kListEvent.find(dwPID);
+	const auto it = m_map_kListEvent.find(dwPID);
 
 	if (it == m_map_kListEvent.end())
 		return NULL;
@@ -316,7 +316,7 @@ LPEVENT CTargetManager::GetTargetEvent(DWORD dwPID, DWORD dwQuestIndex, const ch
 
 TargetInfo * CTargetManager::GetTargetInfo(DWORD dwPID, int iType, int iArg1)
 {
-	itertype(m_map_kListEvent) it = m_map_kListEvent.find(dwPID);
+	const auto it = m_map_kListEvent.find(dwPID);
 
 	if (it == m_map_kListEvent.end())
 		return NULL;
@@ -349,12 +349,12 @@ TargetInfo * CTargetManager::GetTargetInfo(DWORD dwPID, int iType, int iArg1)
 
 void CTargetManager::Logout(DWORD dwPID)
 {
-	itertype(m_map_kListEvent) it = m_map_kListEvent.find(dwPID);
+	const auto it = m_map_kListEvent.find(dwPID);
 
 	if (it == m_map_kListEvent.end())
 		return;
 
-	std::list<LPEVENT>::iterator it2 = it->second.begin();
+	auto it2 = it->second.begin();
 
 	while (it2 != it->second.end())
 		event_cancel(&(*(it2++)));

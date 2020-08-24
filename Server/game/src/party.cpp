@@ -8,6 +8,7 @@
 #include "desc_client.h"
 #include "dungeon.h"
 #include "unique_item.h"
+#include <algorithm>
 
 CPartyManager::CPartyManager()
 {
@@ -1632,46 +1633,36 @@ LPCHARACTER CParty::GetExpCentralizeCharacter()
 
 BYTE CParty::GetMemberMaxLevel()
 {
-	BYTE bMax = 0;
-
-	itertype(m_memberMap) it = m_memberMap.begin();
-	while (it!=m_memberMap.end())
-	{
-		if (!it->second.bLevel)
-		{
-			++it;
-			continue;
+	const auto& max = std::max_element(m_memberMap.begin(), m_memberMap.end(), 
+		[] (const auto& p1, const auto& p2) {
+			return p1.second.bLevel < p2.second.bLevel;
 		}
-
-		if (!bMax)
-			bMax = it->second.bLevel;
-		else if (it->second.bLevel)
-			bMax = MAX(bMax, it->second.bLevel);
-		++it;
+	);
+	
+	if (max == m_memberMap.end())
+	{
+		sys_err("calling GetMemberMaxLevel on an empty party");
+		return PLAYER_MAX_LEVEL_CONST;
 	}
-	return bMax;
+	
+	return max->second.bLevel;
 }
 
 BYTE CParty::GetMemberMinLevel()
 {
-	BYTE bMin = PLAYER_MAX_LEVEL_CONST;
-
-	itertype(m_memberMap) it = m_memberMap.begin();
-	while (it!=m_memberMap.end())
-	{
-		if (!it->second.bLevel)
-		{
-			++it;
-			continue;
+	const auto& min = std::min_element(m_memberMap.begin(), m_memberMap.end(), 
+		[] (const auto& p1, const auto& p2) {
+			return p1.second.bLevel < p2.second.bLevel;
 		}
-
-		if (!bMin)
-			bMin = it->second.bLevel;
-		else if (it->second.bLevel)
-			bMin = MIN(bMin, it->second.bLevel);
-		++it;
+	);
+	
+	if (min == m_memberMap.end())
+	{
+		sys_err("calling GetMemberMinLevel on an empty party");
+		return 0;
 	}
-	return bMin;
+	
+	return min->second.bLevel;
 }
 
 int CParty::ComputePartyBonusExpPercent()

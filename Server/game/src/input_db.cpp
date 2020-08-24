@@ -1519,12 +1519,8 @@ void CInputDB::ItemLoad(LPDESC d, const char * c_pData)
 		item->SetSkipSave(false);
 	}
 
-	itertype(v) it = v.begin();
-
-	while (it != v.end())
+	for (const auto& item : v)
 	{
-		LPITEM item = *(it++);
-
 		int pos = ch->GetEmptyInventory(item->GetSize());
 
 		if (pos < 0)

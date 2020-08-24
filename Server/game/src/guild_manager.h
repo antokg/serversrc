@@ -97,9 +97,9 @@ class CGuildManager : public singleton<CGuildManager>
 
 template <typename Func> void CGuildManager::for_each_war(Func & f)
 {
-	for (itertype(m_GuildWar) it = m_GuildWar.begin(); it != m_GuildWar.end(); ++it)
+	for (const auto& it : m_GuildWar)
 	{
-		f(it->first, it->second);
+		f(it.first, it.second);
 	}
 }
 

@@ -81,9 +81,8 @@ namespace marriage
 		Notice(LC_TEXT("결혼식이 종료됩니다."));
 		Notice(LC_TEXT("자동으로 나가게됩니다."));
 
-		for (itertype(m_set_pkChr) it = m_set_pkChr.begin(); it != m_set_pkChr.end(); ++it)
+		for (const auto& ch : m_set_pkChr)
 		{
-			LPCHARACTER ch = *it;
 			if (ch->GetPlayerID() == dwPID1 || ch->GetPlayerID() == dwPID2)
 				continue;
 
@@ -199,9 +198,8 @@ namespace marriage
 
 	void WeddingMap::ShoutInMap(BYTE type, const char* msg)
 	{
-		for (itertype(m_set_pkChr) it = m_set_pkChr.begin(); it != m_set_pkChr.end(); ++it)
+		for (const auto& ch : m_set_pkChr)
 		{
-			LPCHARACTER ch = *it;
 			ch->ChatPacket(CHAT_TYPE_COMMAND, msg);
 		}
 	}
@@ -296,7 +294,7 @@ namespace marriage
 
 	WeddingMap* WeddingManager::Find(DWORD dwMapIndex)
 	{
-		itertype(m_mapWedding) it = m_mapWedding.find(dwMapIndex);
+		const auto it = m_mapWedding.find(dwMapIndex);
 
 		if (it == m_mapWedding.end())
 			return NULL;
@@ -353,7 +351,7 @@ namespace marriage
 
 	bool WeddingManager::End(DWORD dwMapIndex)
 	{
-		itertype(m_mapWedding) it = m_mapWedding.find(dwMapIndex);
+		const auto it = m_mapWedding.find(dwMapIndex);
 
 		if (it == m_mapWedding.end())
 			return false;

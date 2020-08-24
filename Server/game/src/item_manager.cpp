@@ -36,12 +36,11 @@ ITEM_MANAGER::~ITEM_MANAGER()
 
 void ITEM_MANAGER::Destroy()
 {
-	itertype(m_VIDMap) it = m_VIDMap.begin();
-	for ( ; it != m_VIDMap.end(); ++it) {
+	for (const auto& it : m_VIDMap) {
 #ifdef M2_USE_POOL
-		pool_.Destroy(it->second);
+		pool_.Destroy(it.second);
 #else
-		M2_DELETE(it->second);
+		M2_DELETE(it.second);
 #endif
 	}
 	m_VIDMap.clear();
@@ -389,21 +388,21 @@ LPITEM ITEM_MANAGER::CreateItem(DWORD vnum, DWORD count, DWORD id, bool bTryMagi
 
 	if (item->GetType() == ITEM_QUEST)
 	{
-		for (itertype (m_map_pkQuestItemGroup) it = m_map_pkQuestItemGroup.begin(); it != m_map_pkQuestItemGroup.end(); it++)
+		for (const auto& it : m_map_pkQuestItemGroup)
 		{
-			if (it->second->m_bType == CSpecialItemGroup::QUEST && it->second->Contains(vnum))
+			if (it.second->m_bType == CSpecialItemGroup::QUEST && it.second->Contains(vnum))
 			{
-				item->SetSIGVnum(it->first);
+				item->SetSIGVnum(it.first);
 			}
 		}
 	}
 	else if (item->GetType() == ITEM_UNIQUE)
 	{
-		for (itertype (m_map_pkSpecialItemGroup) it = m_map_pkSpecialItemGroup.begin(); it != m_map_pkSpecialItemGroup.end(); it++)
+		for (const auto& it : m_map_pkSpecialItemGroup)
 		{
-			if (it->second->m_bType == CSpecialItemGroup::SPECIAL && it->second->Contains(vnum))
+			if (it.second->m_bType == CSpecialItemGroup::SPECIAL && it.second->Contains(vnum))
 			{
-				item->SetSIGVnum(it->first);
+				item->SetSIGVnum(it.first);
 			}
 		}
 	}
@@ -579,7 +578,7 @@ void ITEM_MANAGER::DestroyItem(LPITEM item, const char* file, size_t line)
 
 LPITEM ITEM_MANAGER::Find(DWORD id)
 {
-	itertype(m_map_pkItemByID) it = m_map_pkItemByID.find(id);
+	const auto it = m_map_pkItemByID.find(id);
 	if (it == m_map_pkItemByID.end())
 		return NULL;
 	return it->second;
@@ -884,8 +883,7 @@ bool ITEM_MANAGER::CreateDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, std::
 
 	// Drop Item Group
 	{
-		itertype(m_map_pkDropItemGroup) it;
-		it = m_map_pkDropItemGroup.find(pkChr->GetRaceNum());
+		const auto it = m_map_pkDropItemGroup.find(pkChr->GetRaceNum());
 
 		if (it != m_map_pkDropItemGroup.end())
 		{
@@ -918,8 +916,7 @@ bool ITEM_MANAGER::CreateDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, std::
 
 	// MobDropItem Group
 	{
-		itertype(m_map_pkMobItemGroup) it;
-		it = m_map_pkMobItemGroup.find(pkChr->GetRaceNum());
+		const auto it = m_map_pkMobItemGroup.find(pkChr->GetRaceNum());
 
 		if ( it != m_map_pkMobItemGroup.end() )
 		{
@@ -944,8 +941,7 @@ bool ITEM_MANAGER::CreateDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, std::
 
 	// Level Item Group
 	{
-		itertype(m_map_pkLevelItemGroup) it;
-		it = m_map_pkLevelItemGroup.find(pkChr->GetRaceNum());
+		const auto it = m_map_pkLevelItemGroup.find(pkChr->GetRaceNum());
 
 		if ( it != m_map_pkLevelItemGroup.end() )
 		{
@@ -971,8 +967,7 @@ bool ITEM_MANAGER::CreateDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, std::
 		if (pkKiller->GetPremiumRemainSeconds(PREMIUM_ITEM) > 0 ||
 				pkKiller->IsEquipUniqueGroup(UNIQUE_GROUP_DOUBLE_ITEM))
 		{
-			itertype(m_map_pkGloveItemGroup) it;
-			it = m_map_pkGloveItemGroup.find(pkChr->GetRaceNum());
+			const auto it = m_map_pkGloveItemGroup.find(pkChr->GetRaceNum());
 
 			if (it != m_map_pkGloveItemGroup.end())
 			{
@@ -996,7 +991,7 @@ bool ITEM_MANAGER::CreateDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, std::
 	// 잡템
 	if (pkChr->GetMobDropItemVnum())
 	{
-		itertype(m_map_dwEtcItemDropProb) it = m_map_dwEtcItemDropProb.find(pkChr->GetMobDropItemVnum());
+		const auto it = m_map_dwEtcItemDropProb.find(pkChr->GetMobDropItemVnum());
 
 		if (it != m_map_dwEtcItemDropProb.end())
 		{
@@ -1053,9 +1048,9 @@ bool ITEM_MANAGER::CreateDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, std::
 	// 
 	CreateQuestDropItem(pkChr, pkKiller, vec_item, iDeltaPercent, iRandRange);
 
-	for (itertype(vec_item) it = vec_item.begin(); it != vec_item.end(); ++it)
+	for (const auto& it : vec_item)
 	{
-		LPITEM item = *it;
+		LPITEM item = it;
 		DBManager::instance().SendMoneyLog(MONEY_LOG_DROP, item->GetVnum(), item->GetCount());
 	}
 
@@ -1689,7 +1684,7 @@ void ITEM_MANAGER::CreateQuestDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, 
 
 DWORD ITEM_MANAGER::GetRefineFromVnum(DWORD dwVnum)
 {
-	itertype(m_map_ItemRefineFrom) it = m_map_ItemRefineFrom.find(dwVnum);
+	const auto it = m_map_ItemRefineFrom.find(dwVnum);
 	if (it != m_map_ItemRefineFrom.end())
 		return it->second;
 	return 0;
@@ -1697,7 +1692,7 @@ DWORD ITEM_MANAGER::GetRefineFromVnum(DWORD dwVnum)
 
 const CSpecialItemGroup* ITEM_MANAGER::GetSpecialItemGroup(DWORD dwVnum)
 {
-	itertype(m_map_pkSpecialItemGroup) it = m_map_pkSpecialItemGroup.find(dwVnum);
+	const auto it = m_map_pkSpecialItemGroup.find(dwVnum);
 	if (it != m_map_pkSpecialItemGroup.end())
 	{
 		return it->second;
@@ -1707,7 +1702,7 @@ const CSpecialItemGroup* ITEM_MANAGER::GetSpecialItemGroup(DWORD dwVnum)
 
 const CSpecialAttrGroup* ITEM_MANAGER::GetSpecialAttrGroup(DWORD dwVnum)
 {
-	itertype(m_map_pkSpecialAttrGroup) it = m_map_pkSpecialAttrGroup.find(dwVnum);
+	const auto it = m_map_pkSpecialAttrGroup.find(dwVnum);
 	if (it != m_map_pkSpecialAttrGroup.end())
 	{
 		return it->second;
@@ -1717,13 +1712,15 @@ const CSpecialAttrGroup* ITEM_MANAGER::GetSpecialAttrGroup(DWORD dwVnum)
 
 DWORD ITEM_MANAGER::GetMaskVnum(DWORD dwVnum)
 {
-	TMapDW2DW::iterator it = m_map_new_to_ori.find (dwVnum);
+	const auto it = m_map_new_to_ori.find (dwVnum);
 	if (it != m_map_new_to_ori.end())
 	{
 		return it->second;
 	}
 	else
+	{
 		return 0;
+	}
 }
 
 // pkNewItem으로 모든 속성과 소켓 값들을 목사하는 함수.

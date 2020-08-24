@@ -592,9 +592,9 @@ namespace quest
 		}
 		// END_OF_LUA_INIT_ERROR_MESSAGE
 
-		for (itertype(g_setQuestObjectDir) it = g_setQuestObjectDir.begin(); it != g_setQuestObjectDir.end(); ++it)
+		for (const auto& it : g_setQuestObjectDir)
 		{
-			const string& stQuestObjectDir = *it;
+			const string& stQuestObjectDir = it;
 			char buf[PATH_MAX];
 			snprintf(buf, sizeof(buf), "%s/state/", stQuestObjectDir.c_str());
 			DIR * pdir = opendir(buf);

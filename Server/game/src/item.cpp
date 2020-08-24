@@ -782,9 +782,9 @@ void CItem::ModifyPoints(bool bAdd)
 					const CSpecialAttrGroup* pAttrGroup = ITEM_MANAGER::instance().GetSpecialAttrGroup(dwAttrVnum);
 					if (NULL == pAttrGroup)
 						break;
-					for (itertype (pAttrGroup->m_vecAttrs) it = pAttrGroup->m_vecAttrs.begin(); it != pAttrGroup->m_vecAttrs.end(); it++)
+					for (const auto& it : pAttrGroup->m_vecAttrs)
 					{
-						m_pOwner->ApplyPoint(it->apply_type, bAdd ? it->apply_value : -it->apply_value);
+						m_pOwner->ApplyPoint(it.apply_type, bAdd ? it.apply_value : -it.apply_value);
 					}
 				}
 			}

@@ -137,9 +137,9 @@ namespace marriage
 	template <typename Func>
 		Func CManager::for_each_wedding(Func f)
 		{
-			for (itertype(m_setWedding) it = m_setWedding.begin(); it!=m_setWedding.end(); ++it)
+			for (const auto& it : m_setWedding)
 			{
-				TMarriage* pMarriage = Get(it->first);
+				TMarriage* pMarriage = Get(it.first);
 				if (pMarriage)
 					f(pMarriage);
 			}
