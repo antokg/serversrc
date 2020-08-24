@@ -271,10 +271,7 @@ bool COXEventManager::Quiz(unsigned char level, int timelimit)
 bool COXEventManager::CheckAnswer(bool answer)
 {
 	if (m_map_attender.size() <= 0) return true;
-	
-	itertype(m_map_attender) iter = m_map_attender.begin();
-	itertype(m_map_attender) iter_tmp;
-	
+		
 	m_map_miss.clear();
 
 	int rect[4];
@@ -295,7 +292,7 @@ bool COXEventManager::CheckAnswer(bool answer)
 	
 	LPCHARACTER pkChar = NULL;
 	PIXEL_POSITION pos;
-	for (; iter != m_map_attender.end();)
+	for (auto iter = m_map_attender.cbegin(); iter != m_map_attender.cend();)
 	{
 		pkChar = CHARACTER_MANAGER::instance().FindByPID(iter->second);
 		if (pkChar != NULL)
@@ -305,9 +302,7 @@ bool COXEventManager::CheckAnswer(bool answer)
 			if (pos.x < rect[0] || pos.x > rect[2] || pos.y < rect[1] || pos.y > rect[3])
 			{
 				pkChar->EffectPacket(SE_FAIL);
-				iter_tmp = iter;
-				iter++;
-				m_map_attender.erase(iter_tmp);
+				iter = m_map_attender.erase(iter);
 				m_map_miss.insert(std::make_pair(pkChar->GetPlayerID(), pkChar->GetPlayerID()));
 			}
 			else
@@ -343,15 +338,13 @@ bool COXEventManager::CheckAnswer(bool answer)
 		}
 		else
 		{
-			itertype(m_map_char) err = m_map_char.find(iter->first);
+			const auto err = m_map_char.find(iter->first);
 			if (err != m_map_char.end()) m_map_char.erase(err);
 
-			itertype(m_map_miss) err2 = m_map_miss.find(iter->first);
+			const auto err2 = m_map_miss.find(iter->first);
 			if (err2 != m_map_miss.end()) m_map_miss.erase(err2);
 
-			iter_tmp = iter;
-			++iter;
-			m_map_attender.erase(iter_tmp);
+			iter = m_map_attender.erase(iter);
 		}
 	}
 	return true;
@@ -361,12 +354,11 @@ void COXEventManager::WarpToAudience()
 {
 	if (m_map_miss.size() <= 0) return;
 
-	itertype(m_map_miss) iter = m_map_miss.begin();
 	LPCHARACTER pkChar = NULL;
 	
-	for (; iter != m_map_miss.end(); ++iter)
+	for (const auto& iter : m_map_miss)
 	{
-		pkChar = CHARACTER_MANAGER::instance().FindByPID(iter->second);
+		pkChar = CHARACTER_MANAGER::instance().FindByPID(iter.second);
 
 		if (pkChar != NULL)
 		{
@@ -390,12 +382,10 @@ bool COXEventManager::CloseEvent()
 		event_cancel(&m_timedEvent);
 	}
 
-	itertype(m_map_char) iter = m_map_char.begin();
-
 	LPCHARACTER pkChar = NULL;
-	for (; iter != m_map_char.end(); ++iter)
+	for (const auto& iter : m_map_char)
 	{
-		pkChar = CHARACTER_MANAGER::instance().FindByPID(iter->second);
+		pkChar = CHARACTER_MANAGER::instance().FindByPID(iter.second);
 
 		if (pkChar != NULL)
 			pkChar->WarpSet(EMPIRE_START_X(pkChar->GetEmpire()), EMPIRE_START_Y(pkChar->GetEmpire()));
@@ -408,11 +398,9 @@ bool COXEventManager::CloseEvent()
 
 bool COXEventManager::LogWinner()
 {
-	itertype(m_map_attender) iter = m_map_attender.begin();
-	
-	for (; iter != m_map_attender.end(); ++iter)
+	for (const auto& iter : m_map_attender)
 	{
-		LPCHARACTER pkChar = CHARACTER_MANAGER::instance().FindByPID(iter->second);
+		LPCHARACTER pkChar = CHARACTER_MANAGER::instance().FindByPID(iter.second);
 
 		if (pkChar)
 			LogManager::instance().CharLog(pkChar, 0, "OXEVENT", "LastManStanding");
@@ -423,11 +411,9 @@ bool COXEventManager::LogWinner()
 
 bool COXEventManager::GiveItemToAttender(DWORD dwItemVnum, BYTE count)
 {
-	itertype(m_map_attender) iter = m_map_attender.begin();
-
-	for (; iter != m_map_attender.end(); ++iter)
+	for (const auto& iter : m_map_attender)
 	{
-		LPCHARACTER pkChar = CHARACTER_MANAGER::instance().FindByPID(iter->second);
+		LPCHARACTER pkChar = CHARACTER_MANAGER::instance().FindByPID(iter.second);
 
 		if (pkChar)
 		{
