@@ -813,13 +813,11 @@ bool CClientManager::InitializeItemTable()
 	// END_OF_QUEST_ITEM_PROTO_DISABLE
 
 	m_map_itemTableByVnum.clear();
-
-	itertype(m_vec_itemTable) it = m_vec_itemTable.begin();
-
+	auto it = m_vec_itemTable.begin();
 	while (it != m_vec_itemTable.end())
 	{
 		TItemTable * item_table = &(*(it++));
-
+		
 		sys_log(1, "ITEM: #%-5lu %-24s %-24s VAL: %ld %ld %ld %ld %ld %ld WEAR %lu ANTI %lu IMMUNE %lu REFINE %lu REFINE_SET %u MAGIC_PCT %u", 
 				item_table->dwVnum,
 				item_table->szName,
@@ -1342,9 +1340,8 @@ bool CClientManager::InitializeMonarch()
 
 bool CClientManager::MirrorMobTableIntoDB()
 {
-	for (itertype(m_vec_mobTable) it = m_vec_mobTable.begin(); it != m_vec_mobTable.end(); it++)
+	for (const auto& t : m_vec_mobTable)
 	{
-		const TMobTable& t = *it;
 		char query[4096];
 		if (g_stLocaleNameColumn == "name")
 		{
@@ -1458,11 +1455,10 @@ bool CClientManager::MirrorMobTableIntoDB()
 
 bool CClientManager::MirrorItemTableIntoDB()
 {
-	for (itertype(m_vec_itemTable) it = m_vec_itemTable.begin(); it != m_vec_itemTable.end(); it++)
+	for (const auto& t : m_vec_itemTable)
 	{
 		if (g_stLocaleNameColumn != "name")
 		{
-			const TItemTable& t = *it;
 			char query[4096];
 			snprintf(query, sizeof(query),
 				"replace into item_proto%s ("
@@ -1490,7 +1486,6 @@ bool CClientManager::MirrorItemTableIntoDB()
 		}
 		else
 		{
-			const TItemTable& t = *it;
 			char query[4096];
 			snprintf(query, sizeof(query),
 				"replace into item_proto%s ("

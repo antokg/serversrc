@@ -1,6 +1,5 @@
 #ifndef __INC_METiN_II_DBSERV_STDAFX_H__
 #define __INC_METiN_II_DBSERV_STDAFX_H__
-#define typeof(x) __typeof__(x)
 #include "../../libthecore/include/stdafx.h"
 
 #ifndef __WIN32__

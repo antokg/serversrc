@@ -73,7 +73,7 @@ namespace marriage
 
 	TMarriage* CManager::Get(DWORD dwPlayerID)
 	{
-		itertype(m_MarriageByPID) it = m_MarriageByPID.find(dwPlayerID);
+		const auto it = m_MarriageByPID.find(dwPlayerID);
 
 		if (it != m_MarriageByPID.end())
 			return it->second;
@@ -172,11 +172,9 @@ namespace marriage
 		}
 		if (!pMarriage || pMarriage->GetOther(dwPID1) != dwPID2)
 		{
-			itertype(m_MarriageByPID) it = m_MarriageByPID.begin();
-
-			for (; it != m_MarriageByPID.end(); ++it)
+			for (const auto& it : m_MarriageByPID)
 			{
-				sys_log(0, "Marriage List pid1 %d pid2 %d", it->second->pid1, it->second->pid2);
+				sys_log(0, "Marriage List pid1 %d pid2 %d", it.second->pid1, it.second->pid2);
 			}
 			sys_err("not under marriage : PID:%u %u", dwPID1, dwPID2);
 			return;
@@ -254,10 +252,8 @@ namespace marriage
 	void CManager::OnSetup(CPeer* peer)
 	{
 		// 결혼한 사람들 보내기
-		for (itertype(m_Marriages) it = m_Marriages.begin(); it != m_Marriages.end(); ++it)
+		for (const auto& pMarriage : m_Marriages)
 		{
-			TMarriage* pMarriage = *it;
-
 			{
 				TPacketMarriageAdd p;
 				p.dwPID1 = pMarriage->pid1;
@@ -281,9 +277,9 @@ namespace marriage
 		}
 
 		// 결혼식 보내기
-		for (itertype(m_mapRunningWedding) it = m_mapRunningWedding.begin(); it != m_mapRunningWedding.end(); ++it)
+		for (const auto& it : m_mapRunningWedding)
 		{
-			const TWedding& t = it->second;
+			const TWedding& t = it.second;
 
 			TPacketWeddingReady p;
 			p.dwPID1 = t.dwPID1;
@@ -310,7 +306,7 @@ namespace marriage
 
 	void CManager::EndWedding(DWORD dwPID1, DWORD dwPID2)
 	{
-		itertype(m_mapRunningWedding) it = m_mapRunningWedding.find(make_pair(dwPID1, dwPID2));
+		const auto it = m_mapRunningWedding.find(make_pair(dwPID1, dwPID2));
 		if (it == m_mapRunningWedding.end())
 		{
 			sys_err("try to end wedding %u %u", dwPID1, dwPID2);
@@ -337,7 +333,7 @@ namespace marriage
 				TWeddingInfo wi = m_pqWeddingEnd.top();
 				m_pqWeddingEnd.pop();
 
-				itertype(m_mapRunningWedding) it = m_mapRunningWedding.find(make_pair(wi.dwPID1, wi.dwPID2));
+				const auto it = m_mapRunningWedding.find(make_pair(wi.dwPID1, wi.dwPID2));
 				if (it == m_mapRunningWedding.end())
 					continue;
 
@@ -349,7 +345,7 @@ namespace marriage
 				CClientManager::instance().ForwardPacket(HEADER_DG_WEDDING_END, &p, sizeof(p));
 				m_mapRunningWedding.erase(it);
 
-				itertype(m_MarriageByPID) it_marriage = m_MarriageByPID.find(w.dwPID1);
+				const auto it_marriage = m_MarriageByPID.find(w.dwPID1);
 
 				if (it_marriage != m_MarriageByPID.end())
 				{

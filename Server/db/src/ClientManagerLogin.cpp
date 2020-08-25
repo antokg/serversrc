@@ -18,7 +18,7 @@ bool CClientManager::InsertLogonAccount(const char * c_pszLogin, DWORD dwHandle,
 	char szLogin[LOGIN_MAX_LEN + 1];
 	trim_and_lower(c_pszLogin, szLogin, sizeof(szLogin));
 
-	itertype(m_map_kLogonAccount) it = m_map_kLogonAccount.find(szLogin);
+	const auto it = m_map_kLogonAccount.find(szLogin);
 
 	if (m_map_kLogonAccount.end() != it)
 		return false;
@@ -40,7 +40,7 @@ bool CClientManager::DeleteLogonAccount(const char * c_pszLogin, DWORD dwHandle)
 	char szLogin[LOGIN_MAX_LEN + 1];
 	trim_and_lower(c_pszLogin, szLogin, sizeof(szLogin));
 
-	itertype(m_map_kLogonAccount) it = m_map_kLogonAccount.find(szLogin);
+	const auto it = m_map_kLogonAccount.find(szLogin);
 
 	if (it == m_map_kLogonAccount.end())
 		return false;
