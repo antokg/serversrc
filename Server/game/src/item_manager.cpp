@@ -887,7 +887,7 @@ bool ITEM_MANAGER::CreateDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, std::
 
 		if (it != m_map_pkDropItemGroup.end())
 		{
-			typeof(it->second->GetVector()) v = it->second->GetVector();
+			const auto v = it->second->GetVector();
 
 			for (DWORD i = 0; i < v.size(); ++i)
 			{
@@ -947,7 +947,7 @@ bool ITEM_MANAGER::CreateDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, std::
 		{
 			if ( it->second->GetLevelLimit() <= (DWORD)iLevel )
 			{
-				typeof(it->second->GetVector()) v = it->second->GetVector();
+				const auto v = it->second->GetVector();
 
 				for ( DWORD i=0; i < v.size(); i++ )
 				{
@@ -971,7 +971,7 @@ bool ITEM_MANAGER::CreateDropItem(LPCHARACTER pkChr, LPCHARACTER pkKiller, std::
 
 			if (it != m_map_pkGloveItemGroup.end())
 			{
-				typeof(it->second->GetVector()) v = it->second->GetVector();
+				const auto v = it->second->GetVector();
 
 				for (DWORD i = 0; i < v.size(); ++i)
 				{

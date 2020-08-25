@@ -36,11 +36,9 @@ bool CBanwordManager::CheckString(const char * c_pszString, size_t _len)
 	if (m_hashmap_words.empty())
 		return false;
 
-	typeof(m_hashmap_words.begin()) it = m_hashmap_words.begin();
-
-	while (it != m_hashmap_words.end())
+	for (const auto& it : m_hashmap_words)
 	{
-		const std::string & r = it->first;
+		const std::string & r = it.first;
 		const char * tmp = c_pszString;
 		ssize_t len = _len;
 
@@ -64,7 +62,6 @@ bool CBanwordManager::CheckString(const char * c_pszString, size_t _len)
 			}
 		}
 
-		it++;
 	}
 
 	return false;
@@ -72,11 +69,9 @@ bool CBanwordManager::CheckString(const char * c_pszString, size_t _len)
 
 void CBanwordManager::ConvertString(char * c_pszString, size_t _len)
 {
-	typeof(m_hashmap_words.begin()) it = m_hashmap_words.begin();
-
-	while (it != m_hashmap_words.end())
+	for (const auto& it : m_hashmap_words)
 	{
-		const std::string & r = it->first;
+		const std::string & r = it.first;
 
 		char * tmp = c_pszString;
 		ssize_t len = _len;
@@ -119,8 +114,6 @@ void CBanwordManager::ConvertString(char * c_pszString, size_t _len)
 				}
 			}
 		}
-
-		it++;
 	}
 }
 

@@ -7,7 +7,6 @@
 // Enable or disable heap allocation debugging
 //#define DEBUG_ALLOC
 
-#define typeof(x) __typeof__(x)
 #include "debug_allocator.h"
 
 #include "../../libthecore/include/stdafx.h"

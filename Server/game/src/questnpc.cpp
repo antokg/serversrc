@@ -32,7 +32,7 @@ namespace quest
 
 		while (itEventName != CQuestManager::instance().m_mapEventName.end())
 		{
-			typeof(itEventName) it = itEventName;
+			const auto it = itEventName;
 			++itEventName;
 
 			for (const auto& itObjectDir : g_setQuestObjectDir)
