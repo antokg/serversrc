@@ -1,6 +1,9 @@
 #ifndef __INC_LIBTHECORE_UTILS_H__
 #define __INC_LIBTHECORE_UTILS_H__
 
+#include <vector>
+extern std::vector<std::string> split_string(const std::string &s, char delim);
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -32,7 +35,6 @@ extern "C"
 
     // 문자열을 소문자로
     extern void		lower_string(const char * src, char * dest, size_t dest_len);
-
     // arg1이 arg2로 시작하는가? (대소문자 구별하지 않음)
     extern int		is_abbrev(char *arg1, char *arg2);
 

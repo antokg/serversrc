@@ -600,6 +600,9 @@ typedef struct SItemTable : public SEntityTable
 	char	szLocaleName[ITEM_NAME_MAX_LEN + 1];
 	BYTE	bType;
 	BYTE	bSubType;
+	
+	BYTE	bMaskedType;
+	BYTE	bMaskedSubType;
 
 	BYTE        bWeight;
 	BYTE	bSize;
@@ -618,6 +621,9 @@ typedef struct SItemTable : public SEntityTable
 	int	alSockets[ITEM_SOCKET_MAX_NUM];
 	DWORD	dwRefinedVnum;
 	WORD	wRefineSet;
+	
+	DWORD dw67Material;
+	
 	BYTE	bAlterToMagicItemPct;
 	BYTE	bSpecular;
 	BYTE	bGainSocketPct;

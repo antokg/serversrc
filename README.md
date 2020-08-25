@@ -6,7 +6,7 @@ Packages FreeBSD nécessaires pour la compilation :
 
 * gmake
 * makedepend
-* mysql56 ou superieur
+* mysql56-client ou superieur
 
 ### Première compilation
 

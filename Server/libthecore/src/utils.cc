@@ -2,6 +2,9 @@
 #include "stdafx.h"
 #include <chrono>
 #include <thread>
+#include <string>
+#include <sstream>
+#include <vector>
 
 static struct timeval null_time = { 0, 0 };
 
@@ -436,4 +439,16 @@ double get_double_time()
 DWORD get_dword_time()
 {
 	return get_boot_sec();
+}
+
+std::vector<std::string> split_string(const std::string &s, char delim) {
+	std::stringstream ss(s);
+	std::string current;
+	std::vector<std::string> values;
+	
+	while (std::getline(ss, current, delim)) {
+		values.push_back(std::move(current));
+	
+	}
+	return values;
 }
