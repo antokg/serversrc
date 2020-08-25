@@ -311,16 +311,15 @@ void CGuildManager::Update()
 	}
 }
 
-#define for_all(cont, it) for (typeof((cont).begin()) it = (cont).begin(); it != (cont).end(); ++it)
-
 void CGuildManager::OnSetup(CPeer* peer)
 {
-	for_all(m_WarMap, it_cont)
-		for_all(it_cont->second, it)
+	for (const auto& it_cont : m_WarMap)
+	{
+		for (const auto& it : it_cont.second)
 		{
-			DWORD g1 = it_cont->first;
-			DWORD g2 = it->first;
-			TGuildWarPQElement* p = it->second.pElement;
+			DWORD g1 = it_cont.first;
+			DWORD g2 = it.first;
+			TGuildWarPQElement* p = it.second.pElement;
 
 			if (!p || p->bEnd)
 				continue;
@@ -329,26 +328,27 @@ void CGuildManager::OnSetup(CPeer* peer)
 			FSendGuildWarScore(p->GID[0], p->GID[1], p->iScore[0], p->iBetScore[0]);
 			FSendGuildWarScore(p->GID[1], p->GID[0], p->iScore[1], p->iBetScore[1]);
 		}
-
-	for_all(m_DeclareMap, it)
-	{
-		FSendPeerWar(it->bType, GUILD_WAR_SEND_DECLARE, it->dwGuildID[0], it->dwGuildID[1]) (peer);
 	}
 
-	for_all(m_map_kWarReserve, it)
+	for (const auto& it : m_DeclareMap)
 	{
-		it->second->OnSetup(peer);
+		FSendPeerWar(it.bType, GUILD_WAR_SEND_DECLARE, it.dwGuildID[0], it.dwGuildID[1]) (peer);
+	}
+
+	for (const auto& it : m_map_kWarReserve)
+	{
+		it.second->OnSetup(peer);
 	}
 }
 
 void CGuildManager::GuildWarWin(DWORD GID)
 {
-	itertype(m_map_kGuild) it = m_map_kGuild.find(GID);
+	const auto it = m_map_kGuild.find(GID);
 
 	if (it == m_map_kGuild.end())
 		return;
 
-	++it->second.win;
+	it->second.win++;
 
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "UPDATE guild%s SET win=%d WHERE id=%u", GetTablePostfix(), it->second.win, GID);
@@ -357,12 +357,12 @@ void CGuildManager::GuildWarWin(DWORD GID)
 
 void CGuildManager::GuildWarLose(DWORD GID)
 {
-	itertype(m_map_kGuild) it = m_map_kGuild.find(GID);
+	const auto it = m_map_kGuild.find(GID);
 
 	if (it == m_map_kGuild.end())
 		return;
 
-	++it->second.loss;
+	it->second.loss++;
 
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "UPDATE guild%s SET loss=%d WHERE id=%u", GetTablePostfix(), it->second.loss, GID);
@@ -371,12 +371,12 @@ void CGuildManager::GuildWarLose(DWORD GID)
 
 void CGuildManager::GuildWarDraw(DWORD GID)
 {
-	itertype(m_map_kGuild) it = m_map_kGuild.find(GID);
+	const auto it = m_map_kGuild.find(GID);
 
 	if (it == m_map_kGuild.end())
 		return;
 
-	++it->second.draw;
+	it->second.draw++;
 
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "UPDATE guild%s SET draw=%d WHERE id=%u", GetTablePostfix(), it->second.draw, GID);
@@ -653,7 +653,7 @@ void CGuildManager::AddDeclare(BYTE bType, DWORD guild_from, DWORD guild_to)
 
 void CGuildManager::RemoveDeclare(DWORD guild_from, DWORD guild_to)
 {
-	typeof(m_DeclareMap.begin()) it = m_DeclareMap.find(TGuildDeclareInfo(0, guild_from, guild_to));
+	auto it = m_DeclareMap.find(TGuildDeclareInfo(0, guild_from, guild_to));
 
 	if (it != m_DeclareMap.end())
 		m_DeclareMap.erase(it);

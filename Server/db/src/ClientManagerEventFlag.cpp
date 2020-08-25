@@ -34,7 +34,7 @@ void CClientManager::SetEventFlag(TPacketSetEventFlag* p)
 
 	bool bChanged = false;
 
-	typeof(m_map_lEventFlag.begin()) it = m_map_lEventFlag.find(p->szFlagName);
+	const auto it = m_map_lEventFlag.find(p->szFlagName);
 	if (it == m_map_lEventFlag.end())
 	{
 		bChanged = true;
@@ -64,12 +64,11 @@ void CClientManager::SetEventFlag(TPacketSetEventFlag* p)
 
 void CClientManager::SendEventFlagsOnSetup(CPeer* peer)
 {
-	typeof(m_map_lEventFlag.begin()) it;
-	for (it = m_map_lEventFlag.begin(); it != m_map_lEventFlag.end(); ++it)
+	for (const auto& it : m_map_lEventFlag)
 	{
 		TPacketSetEventFlag p;
-		strlcpy(p.szFlagName, it->first.c_str(), sizeof(p.szFlagName));
-		p.lValue = it->second;
+		strlcpy(p.szFlagName, it.first.c_str(), sizeof(p.szFlagName));
+		p.lValue = it.second;
 		peer->EncodeHeader(HEADER_DG_SET_EVENT_FLAG, 0, sizeof(TPacketSetEventFlag));
 		peer->Encode(&p, sizeof(TPacketSetEventFlag));
 	}

@@ -408,10 +408,9 @@ void CClientManager::ItemAward(CPeer * peer,char* login)
 	std::set<TItemAward *> * pSet = ItemAwardManager::instance().GetByLogin(login_t);	
 	if(pSet == NULL)
 		return;
-	typeof(pSet->begin()) it = pSet->begin();	//taken_time이 NULL인것들 읽어옴	
-	while(it != pSet->end() )
+
+	for (const auto& pItemAward : *pSet)
 	{				
-		TItemAward * pItemAward = *(it++);		
 		char* whyStr = pItemAward->szWhy;	//why 콜룸 읽기
 		char cmdStr[100] = "";	//why콜룸에서 읽은 값을 임시 문자열에 복사해둠
 		strcpy(cmdStr,whyStr);	//명령어 얻는 과정에서 토큰쓰면 원본도 토큰화 되기 때문

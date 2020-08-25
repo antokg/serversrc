@@ -624,13 +624,10 @@ void CClientManager::RESULT_SAFEBOX_LOAD(CPeer * pkPeer, SQLMsg * msg)
 			{
 				std::vector<std::pair<DWORD, DWORD> > vec_dwFinishedAwardID;
 
-				typeof(pSet->begin()) it = pSet->begin();
-
 				char szQuery[512];
 
-				while (it != pSet->end())
+				for (const auto& pItemAward : *pSet)
 				{
-					TItemAward * pItemAward = *(it++);
 					const DWORD& dwItemVnum = pItemAward->dwVnum;
 
 					if (pItemAward->bTaken)
@@ -642,7 +639,7 @@ void CClientManager::RESULT_SAFEBOX_LOAD(CPeer * pkPeer, SQLMsg * msg)
 					if (pi->ip[0] == 1 && !pItemAward->bMall)
 						continue;
 
-					itertype(m_map_itemTableByVnum) it = m_map_itemTableByVnum.find(pItemAward->dwVnum);
+					const auto it = m_map_itemTableByVnum.find(pItemAward->dwVnum);
 
 					if (it == m_map_itemTableByVnum.end())
 					{
@@ -712,13 +709,13 @@ void CClientManager::RESULT_SAFEBOX_LOAD(CPeer * pkPeer, SQLMsg * msg)
 					}
 
 					{
-						itertype(m_map_itemTableByVnum) it = m_map_itemTableByVnum.find (dwItemVnum);
-						if (it == m_map_itemTableByVnum.end())
+						const auto it2 = m_map_itemTableByVnum.find (dwItemVnum);
+						if (it2 == m_map_itemTableByVnum.end())
 						{
 							sys_err ("Invalid item(vnum : %d). It is not in m_map_itemTableByVnum.", dwItemVnum);
 							continue;
 						}
-						TItemTable* item_table = it->second;
+						TItemTable* item_table = it2->second;
 						if (item_table == NULL)
 						{
 							sys_err ("Invalid item_table (vnum : %d). It's value is NULL in m_map_itemTableByVnum.", dwItemVnum);

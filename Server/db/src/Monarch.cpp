@@ -2,7 +2,6 @@
 #include "../../common/utils.h"
 #include "Main.h"
 #include "ClientManager.h"
-#define typeof(x) __typeof__(x)
 
 extern int g_test_server;
 
@@ -43,19 +42,17 @@ void CMonarch::ElectMonarch()
 
 	int * s = new int[size];
 
-	itertype(m_map_MonarchElection) it = m_map_MonarchElection.begin();
-
 	int idx = 0;
 
-	for (; it != m_map_MonarchElection.end(); ++it)	
+	for (const auto& it : m_map_MonarchElection)
 	{
-		if ((idx =  GetCandidacyIndex(it->second->pid)) < 0)
+		if ((idx =  GetCandidacyIndex(it.second->pid)) < 0)
 			continue;
 
 		++s[idx];
 
 		if (g_test_server)
-			sys_log (0, "[MONARCH_VOTE] pid(%d) come to vote candidacy pid(%d)", it->second->pid, m_vec_MonarchCandidacy[idx].pid);
+			sys_log (0, "[MONARCH_VOTE] pid(%d) come to vote candidacy pid(%d)", it.second->pid, m_vec_MonarchCandidacy[idx].pid);
 	}
 
 	delete [] s;
@@ -95,8 +92,7 @@ bool CMonarch::AddCandidacy(DWORD pid, const char * name)
 
 bool CMonarch::DelCandidacy(const char * name)
 {
-	itertype(m_vec_MonarchCandidacy) it = m_vec_MonarchCandidacy.begin();
-	for (; it != m_vec_MonarchCandidacy.end(); ++it)
+	for (auto it = m_vec_MonarchCandidacy.cbegin(); it != m_vec_MonarchCandidacy.cend(); ++it)
 	{
 		if (0 == strncmp(it->name, name, sizeof(it->name)))
 		{
@@ -298,12 +294,13 @@ bool CMonarch::DelMonarch(const char * name)
 
 int CMonarch::GetCandidacyIndex(DWORD pid)
 {
-	itertype(m_vec_MonarchCandidacy) it = m_vec_MonarchCandidacy.begin();
-
-	for (int n = 0; it != m_vec_MonarchCandidacy.end(); ++it, ++n)
+	int n = 0;
+	for (const auto& it : m_vec_MonarchCandidacy)
 	{
-		if (it->pid == pid)
-			return n;		
+		if (it.pid == pid)
+			return n;	
+
+		++n;
 	}
 
 	return -1;

@@ -501,13 +501,11 @@ bool CClientManager::InitializeShopTable()
 	m_pShopTable = new TShopTable[map_shop.size()];
 	m_iShopTableSize = map_shop.size();
 
-	typeof(map_shop.begin()) it = map_shop.begin();
-
 	int i = 0;
 
-	while (it != map_shop.end())
+	for (const auto& it : map_shop)
 	{
-		thecore_memcpy((m_pShopTable + i), (it++)->second, sizeof(TShopTable));
+		thecore_memcpy((m_pShopTable + i), it.second, sizeof(TShopTable));
 		sys_log(0, "SHOP: #%d items: %d", (m_pShopTable + i)->dwVnum, (m_pShopTable + i)->byItemCount);
 		++i;
 	}
