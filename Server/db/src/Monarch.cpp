@@ -173,7 +173,7 @@ bool CMonarch::LoadMonarch()
 {
 	MonarchInfo * p = &m_MonarchInfo;
     char szQuery[256];
-	snprintf(szQuery, sizeof(szQuery), "SELECT empire, pid, name, money, windate FROM monarch a, player%s b where a.pid=b.id", GetTablePostfix());
+	snprintf(szQuery, sizeof(szQuery), "SELECT empire, pid, b.name, money, windate FROM monarch a, player%s b where a.pid=b.id", GetTablePostfix());
     SQLMsg * pMsg = CDBManager::instance().DirectQuery(szQuery, SQL_PLAYER);
 
     if (pMsg->Get()->uiNumRows == 0)
