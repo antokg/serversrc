@@ -456,6 +456,7 @@ typedef struct SMobTable : public SEntityTable
 	BYTE	bRank;			// PAWN, KNIGHT, KING
 	BYTE	bBattleType;		// MELEE, etc..
 	BYTE	bLevel;			// Level
+	BYTE	bScalePct;
 	BYTE	bSize;
 
 	DWORD	dwGoldMin;
@@ -481,7 +482,8 @@ typedef struct SMobTable : public SEntityTable
 
 	char	cEnchants[MOB_ENCHANTS_MAX_NUM];
 	char	cResists[MOB_RESISTS_MAX_NUM];
-
+	char	cAtt[MOB_ATT_MAX_NUM];
+	
 	DWORD	dwResurrectionVnum;
 	DWORD	dwDropItemVnum;
 
@@ -505,6 +507,14 @@ typedef struct SMobTable : public SEntityTable
 	BYTE	bGodSpeedPoint;
 	BYTE	bDeathBlowPoint;
 	BYTE	bRevivePoint;
+	
+	// UNUSED YET
+	// BYTE	bHealPoint;
+	// BYTE	bReverseAtkSpeed;
+	// BYTE	bReverseCastSpeed;
+	// BYTE	bReverseHPRegen;
+	// float	fHitRange;
+	
 } TMobTable;
 
 typedef struct SSkillTable

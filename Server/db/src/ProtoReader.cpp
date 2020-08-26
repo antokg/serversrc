@@ -529,21 +529,28 @@ int get_Mob_Rank_Value(string inputString)
 
 int get_Mob_Type_Value(string inputString)
 {
-	string arType[] = { "MONSTER", "NPC", "STONE", "WARP", "DOOR", "BUILDING", "PC", "POLYMORPH_PC", "HORSE", "GOTO"};
+	string arType[] = { "MONSTER", "NPC", "STONE", "WARP", "DOOR", "BUILDING", "PC", "POLYMORPH_PC", "HORSE", "GOTO", "PET", "PET_PAY" };
 
 	int retInt = -1;
+	bool found = false;
 	//cout << "Type : " << typeStr << " -> ";
 	for (int j=0;j<sizeof(arType)/sizeof(arType[0]);j++) {
 		string tempString = arType[j];
 		string tempInputString = trim(inputString);
 		if	(tempInputString.compare(tempString)==0) 
 		{
+			found = true;
 			//cout << j << " ";
 			retInt =  j;
 			break;
 		}
 	}
 	//cout << endl;
+	
+	if (!found)
+	{
+		sys_err("mob type %s does not exist", inputString.c_str());
+	}
 
 	return retInt;
 }
@@ -553,18 +560,24 @@ int get_Mob_BattleType_Value(string inputString)
 	string arBattleType[] = { "MELEE", "RANGE", "MAGIC", "SPECIAL", "POWER", "TANKER", "SUPER_POWER", "SUPER_TANKER"};
 
 	int retInt = -1;
+	bool found = false;
 	//cout << "Battle Type : " << battleTypeStr << " -> ";
 	for (int j=0;j<sizeof(arBattleType)/sizeof(arBattleType[0]);j++) {
 		string tempString = arBattleType[j];
 		string tempInputString = trim(inputString);
 		if	(tempInputString.compare(tempString)==0) 
 		{ 
+			found = true;
 			//cout << j << " ";
 			retInt =  j;
 			break;
 		}
 	}
 	//cout << endl;
+	if (!found)
+	{
+		sys_err("mob battleType %s does not exist", inputString.c_str());
+	}
 
 	return retInt;
 }
@@ -592,14 +605,16 @@ int get_Mob_Size_Value(string inputString)
 
 int get_Mob_AIFlag_Value(string inputString)
 {
-	std::vector<std::string> arAIFlag = {"AGGR","NOMOVE","COWARD","NOATTSHINSU","NOATTCHUNJO","NOATTJINNO","ATTMOB","BERSERK","STONESKIN","GODSPEED","DEATHBLOW","REVIVE"};
+	std::vector<std::string> arAIFlag = {"AGGR","NOMOVE","COWARD","NOATTSHINSU","NOATTCHUNJO","NOATTJINNO","ATTMOB","BERSERK","STONESKIN",
+											"GODSPEED","DEATHBLOW","REVIVE", "HEALER", "COUNT", "NORECOVERY", "REFLECT", "FALL", "VIT",
+											"RATTSPEED", "RCASTSPEED", "", "TIMEVIT" };
 
 	return get_flags_value(inputString, arAIFlag, ',');
 }
 int get_Mob_RaceFlag_Value(string inputString)
 {
 	std::vector<std::string> arRaceFlag = {"ANIMAL","UNDEAD","DEVIL","HUMAN","ORC","MILGYO","INSECT","FIRE","ICE","DESERT","TREE",
-		"ATT_ELEC","ATT_FIRE","ATT_ICE","ATT_WIND","ATT_EARTH","ATT_DARK"};
+		"ATT_ELEC","ATT_FIRE","ATT_ICE","ATT_WIND","ATT_EARTH","ATT_DARK", "DECO", "HIDE", "ATT_CZ" };
 
 	return get_flags_value(inputString, arRaceFlag, ',');
 }
@@ -635,12 +650,25 @@ bool Set_Proto_Mob_Table(TMobTable *mobTable, cCsvTable &csvTable,std::map<int,c
 	mobTable->bRank = rankValue;
 	//TYPE
 	int typeValue = get_Mob_Type_Value(csvTable.AsStringByIndex(col++));
+	if (typeValue == -1)
+	{
+		sys_err("invalid value for mob %d", mobTable->dwVnum);
+		exit(0);
+	}
 	mobTable->bType = typeValue;
 	//BATTLE_TYPE
 	int battleTypeValue = get_Mob_BattleType_Value(csvTable.AsStringByIndex(col++));
 	mobTable->bBattleType = battleTypeValue;
+	if (battleTypeValue == -1)
+	{
+		sys_err("invalid value for mob %d", mobTable->dwVnum);
+		exit(0);
+	}
 
 	str_to_number(mobTable->bLevel, csvTable.AsStringByIndex(col++));
+	
+	str_to_number(mobTable->bScalePct, csvTable.AsStringByIndex(col++));
+	
 	//SIZE
 	int sizeValue = get_Mob_Size_Value(csvTable.AsStringByIndex(col++));
 	mobTable->bSize = sizeValue;
@@ -688,6 +716,9 @@ bool Set_Proto_Mob_Table(TMobTable *mobTable, cCsvTable &csvTable,std::map<int,c
 
 	for (int i = 0; i < MOB_RESISTS_MAX_NUM; ++i)
 		str_to_number(mobTable->cResists[i], csvTable.AsStringByIndex(col++));
+	
+	for (int i = 0; i < MOB_ATT_MAX_NUM; ++i)
+		str_to_number(mobTable->cAtt[i], csvTable.AsStringByIndex(col++));
 
 	str_to_number(mobTable->fDamMultiply, csvTable.AsStringByIndex(col++));
 	str_to_number(mobTable->dwSummonVnum, csvTable.AsStringByIndex(col++));

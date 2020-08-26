@@ -208,7 +208,10 @@ bool CClientManager::InitializeMobTable()
 	} else {
 		nameData.Next();	//설명row 생략.
 		while(nameData.Next()) {
-			localMap[atoi(nameData.AsStringByIndex(0))] = nameData.AsStringByIndex(1);
+			if (nameData.ColCount() == 1)
+				localMap[atoi(nameData.AsStringByIndex(0))] = "";
+			else
+				nameData.AsStringByIndex(1);
 		}
 	}
 	//________________________________________________//
