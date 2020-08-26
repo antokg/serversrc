@@ -1349,14 +1349,15 @@ bool CClientManager::MirrorMobTableIntoDB()
 		snprintf(query, sizeof(query),
 			"replace into mob_proto%s "
 			"("
-			"vnum, name, %s, type, `rank`, battle_type, level, size, ai_flag, setRaceFlag, setImmuneFlag, "
+			"vnum, name, %s, type, `rank`, battle_type, level, scale_pct, size, ai_flag, setRaceFlag, setImmuneFlag, "
 			"on_click, empire, drop_item, resurrection_vnum, folder, "
 			"st, dx, ht, iq, damage_min, damage_max, max_hp, regen_cycle, regen_percent, exp, "
 			"gold_min, gold_max, def, attack_speed, move_speed, aggressive_hp_pct, aggressive_sight, attack_range, polymorph_item, "
 		
 			"enchant_curse, enchant_slow, enchant_poison, enchant_stun, enchant_critical, enchant_penetrate, "
-			"resist_sword, resist_twohand, resist_dagger, resist_bell, resist_fan, resist_bow, "
-			"resist_fire, resist_elect, resist_magic, resist_wind, resist_poison, "
+			"resist_fist, resist_sword, resist_twohand, resist_dagger, resist_bell, resist_fan, resist_bow, "
+			"resist_claw, resist_fire, resist_elect, resist_magic, resist_wind, resist_poison, resist_bleeding, "
+			"resist_dark, resist_ice, resist_earth, att_elec, att_fire, att_ice, att_wind, att_earth, att_dark, "
 			"dam_multiply, summon, drain_sp, "
 		
 			"skill_vnum0, skill_level0, skill_vnum1, skill_level1, skill_vnum2, skill_level2, "
@@ -1365,15 +1366,17 @@ bool CClientManager::MirrorMobTableIntoDB()
 			") "
 			"values ("
 		
-			"%d, \"%s\", \"%s\", %d, %d, %d, %d, %d, %u, %u, %u, " 
+			"%d, \"%s\", \"%s\", %d, %d, %d, %d, %d, %d, %u, %u, %u, " 
 			"%d, %d, %d, %d, '%s', "
 			"%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
 			"%d, %d, %d, %d, %d, %d, %d, %d, %d, "
 		
 			"%d, %d, %d, %d, %d, %d, "
-			"%d, %d, %d, %d, %d, %d, "
-			"%d, %d, %d, %d, %d, "
+			"%d, %d, %d, %d, %d, %d, %d, "
+			"%d, %d, %d, %d, %d, %d, %d, "
+			"%d, %d, %d, %d, %d, %d, %d, %d, %d, "
 			"%f, %d, %d, "
+			" "
 		
 			"%d, %d, %d, %d, %d, %d, "
 			"%d, %d, %d, %d, "
@@ -1381,14 +1384,15 @@ bool CClientManager::MirrorMobTableIntoDB()
 			")",
 			GetTablePostfix(), g_stLocaleNameColumn.c_str(),
 		
-			t.dwVnum, t.szName, t.szLocaleName, t.bType, t.bRank, t.bBattleType, t.bLevel, t.bSize, t.dwAIFlag, t.dwRaceFlag, t.dwImmuneFlag,
+			t.dwVnum, t.szName, t.szLocaleName, t.bType, t.bRank, t.bBattleType, t.bLevel, t.bScalePct, t.bSize, t.dwAIFlag, t.dwRaceFlag, t.dwImmuneFlag,
 			t.bOnClickType, t.bEmpire, t.dwDropItemVnum, t.dwResurrectionVnum, t.szFolder,
 			t.bStr, t.bDex, t.bCon, t.bInt, t.dwDamageRange[0], t.dwDamageRange[1], t.dwMaxHP, t.bRegenCycle, t.bRegenPercent, t.dwExp,
 		
 			t.dwGoldMin, t.dwGoldMax, t.wDef, t.sAttackSpeed, t.sMovingSpeed, t.bAggresiveHPPct, t.wAggressiveSight, t.wAttackRange, t.dwPolymorphItemVnum,
 			t.cEnchants[0], t.cEnchants[1], t.cEnchants[2], t.cEnchants[3], t.cEnchants[4], t.cEnchants[5],
 			t.cResists[0], t.cResists[1], t.cResists[2], t.cResists[3], t.cResists[4], t.cResists[5],
-			t.cResists[6], t.cResists[7], t.cResists[8], t.cResists[9], t.cResists[10], 
+			t.cResists[6], t.cResists[7], t.cResists[8], t.cResists[9], t.cResists[10], t.cResists[11], t.cResists[12], t.cResists[13], t.cResists[14], t.cResists[15], t.cResists[16],
+			t.cAtt[0], t.cAtt[1], t.cAtt[2], t.cAtt[3], t.cAtt[4], t.cAtt[5],
 			t.fDamMultiply, t.dwSummonVnum, t.dwDrainSP, 
 		
 			t.Skills[0].dwVnum, t.Skills[0].bLevel, t.Skills[1].dwVnum, t.Skills[1].bLevel, t.Skills[2].dwVnum, t.Skills[2].bLevel, 
