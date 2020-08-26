@@ -594,7 +594,7 @@ void CItem::ModifyPoints(bool bAdd)
 		if (m_pProto->bType == ITEM_WEAPON || m_pProto->bType == ITEM_ARMOR)
 		{
 			// 소켓이 속성강화에 사용되는 경우 적용하지 않는다 (ARMOR_WRIST ARMOR_NECK ARMOR_EAR)
-			for (int i = 0; i < ITEM_SOCKET_MAX_NUM; ++i)
+			for (int i = 0; i < GetSocketCount(); ++i)
 			{
 				DWORD dwVnum;
 
@@ -1111,11 +1111,15 @@ void CItem::SetOwnership(LPCHARACTER ch, int iSec)
 
 int CItem::GetSocketCount()
 {
+	if (IsRealTimeItem())
+		return 0;
+	
 	for (int i = 0; i < ITEM_SOCKET_MAX_NUM; i++)
 	{
 		if (GetSocket(i) == 0)
 			return i;
 	}
+	
 	return ITEM_SOCKET_MAX_NUM;
 }
 

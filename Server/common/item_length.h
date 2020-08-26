@@ -564,8 +564,8 @@ enum EItemWearableFlag
 	WEARABLE_SHIELD	= (1 << 8),
 	WEARABLE_ARROW	= (1 << 9),
 	WEARABLE_HAIR	= (1 << 10),
-	WEARABLE_ABILITY		= (1 << 11),
-	WEARABLE_COSTUME_BODY	= (1 << 12),
+	WEARABLE_ABILITY	= (1 << 11),
+	WEARABLE_PENDANT	= (1 << 12),
 };
 
 enum ELimitTypes

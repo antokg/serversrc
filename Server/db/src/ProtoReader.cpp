@@ -429,7 +429,7 @@ int get_Item_Immune_Value(string inputString)
 {
 	std::vector<std::string> arImmune = {"PARA","CURSE","STUN","SLEEP","SLOW","POISON","TERROR"};
 
-	return get_flags_value(inputString, arImmune, ',');
+	return get_flags_value(inputString, arImmune, '|');
 }
 
 
