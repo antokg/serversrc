@@ -211,7 +211,7 @@ bool CClientManager::InitializeMobTable()
 			if (nameData.ColCount() == 1)
 				localMap[atoi(nameData.AsStringByIndex(0))] = "";
 			else
-				nameData.AsStringByIndex(1);
+				localMap[atoi(nameData.AsStringByIndex(0))] = nameData.AsStringByIndex(1);
 		}
 	}
 	//________________________________________________//
