@@ -24,35 +24,41 @@ inline string trim_right(const string& str)
 
 string trim(const string& str){return trim_left(trim_right(str));}
 
-static string* StringSplit(string strOrigin, string strTok)
+int get_flags_value(std::string inputString, std::vector<std::string> flags, char sep)
 {
-    int     cutAt;                            //자르는위치
-    int     index     = 0;                    //문자열인덱스
-    string* strResult = new string[30];		  //결과return 할변수
-
-    //strTok을찾을때까지반복
-    while ((cutAt = strOrigin.find_first_of(strTok)) != strOrigin.npos)
-    {
-       if (cutAt > 0)  //자르는위치가0보다크면(성공시)
-       {
-            strResult[index++] = strOrigin.substr(0, cutAt);  //결과배열에추가
-       }
-       strOrigin = strOrigin.substr(cutAt+1);  //원본은자른부분제외한나머지
-    }
-
-    if(strOrigin.length() > 0)  //원본이아직남았으면
-    {
-        strResult[index++] = strOrigin.substr(0, cutAt);  //나머지를결과배열에추가
-    }
-
-	for( int i=0;i<index;i++)
-	{
-		strResult[i] = trim(strResult[i]);
+	if (inputString.compare("NONE") == 0)
+		return 0;
+	
+	int retValue = 0;
+	std::vector<std::string> values = split_string(inputString, sep);
+	for (auto& val : values)
+	{	
+		val.erase(std::remove (val.begin(), val.end(), ' '), val.end());
+		
+		bool found = false;
+		int n = 0;
+		
+		for (const auto& f : flags)
+		{
+			if (val.compare(f) == 0)
+			{
+				found = true;
+				retValue += std::pow(2, n);
+				break;
+			}
+			
+			++n;
+		}
+		
+		if (!found)
+		{
+			sys_err("Not existing flag !! (flag %s)", val.c_str());
+			return -1;
+		}	
 	}
 
-    return strResult;  //결과return
+	return retValue;
 }
-
 
 
 int get_Item_Type_Value(string inputString)
@@ -392,148 +398,38 @@ int get_Item_Mask_SubType_Value(int type_value, string inputString)
 
 int get_Item_AntiFlag_Value(string inputString) 
 {
-
 	std::vector<std::string> arAntiFlag = {"ANTI_FEMALE", "ANTI_MALE", "ANTI_MUSA", "ANTI_ASSASSIN", "ANTI_SURA", "ANTI_MUDANG",
 							"ANTI_GET", "ANTI_DROP", "ANTI_SELL", "ANTI_EMPIRE_A", "ANTI_EMPIRE_B", "ANTI_EMPIRE_C",
 							"ANTI_SAVE", "ANTI_GIVE", "ANTI_PKDROP", "ANTI_STACK", "ANTI_MYSHOP", "ANTI_SAFEBOX",
 							"ANTI_WOLFMAN", "ANTI_PET", "ANTI_QUICKSLOT", "ANTI_CHANGELOOK", "ANTI_REINFORCE", 
 							"ANTI_ENCHANT", "ANTI_PETFEED", "ANTI_ENERGY", "ANTI_APPLY", "ANTI_ACCE", "ANTI_MAIL" };
 
-
-	int retValue = 0;
-	
-	std::vector<std::string> values = split_string(inputString, '|');
-	
-	for (auto& val : values)
-	{
-		if (val.compare("NONE") == 0)
-			return 0;
-		
-		val.erase(std::remove (val.begin(), val.end(), ' '), val.end());
-		
-		bool found = false;
-		
-		int n = 0;
-		
-		for (const auto& anti : arAntiFlag)
-		{
-			if (val.compare(anti) == 0)
-			{
-				found = true;
-				retValue += std::pow(2, n);
-				break;
-			}
-			
-			++n;
-		}
-		
-		if (!found)
-		{
-			sys_err("AntiFlag : Not existing antiflag !! (antiflag %s)", val.c_str());
-			return -1;
-		}	
-	}
-
-	return retValue;
+	return get_flags_value(inputString, arAntiFlag, '|');
 }
 
 int get_Item_Flag_Value(string inputString) 
-{
-
+{	
 	std::vector<std::string> arFlag = {"ITEM_TUNABLE", "ITEM_SAVE", "ITEM_STACKABLE", "COUNT_PER_1GOLD", "ITEM_SLOW_QUERY", "ITEM_UNIQUE",
 			"ITEM_MAKECOUNT", "ITEM_IRREMOVABLE", "CONFIRM_WHEN_USE", "QUEST_USE", "QUEST_USE_MULTIPLE",
 			"QUEST_GIVE", "ITEM_QUEST", "LOG", "STACKABLE", "SLOW_QUERY", "REFINEABLE", "IRREMOVABLE", "ITEM_APPLICABLE"};
 
 
-	int retValue = 0;
-	
-	std::vector<std::string> values = split_string(inputString, '|');
-	
-	for (auto& val : values)
-	{
-		if (val.compare("NONE") == 0)
-			return 0;
-		
-		val.erase(std::remove (val.begin(), val.end(), ' '), val.end());
-		
-		bool found = false;
-		
-		int n = 0;
-		
-		for (const auto& flag : arFlag)
-		{
-			if (val.compare(flag) == 0)
-			{
-				found = true;
-				retValue += std::pow(2, n);
-				break;
-			}
-			
-			++n;
-		}
-		
-		if (!found)
-		{
-			sys_err("Flag : Not existing flag !! (flag %s)", val.c_str());
-			return -1;
-		}	
-	}
-
-	return retValue;
+	return get_flags_value(inputString, arFlag, '|');
 }
 
 int get_Item_WearFlag_Value(string inputString) 
 {
+	std::vector<std::string> arWearrFlag = {"WEAR_BODY", "WEAR_HEAD", "WEAR_FOOTS", "WEAR_WRIST", "WEAR_WEAPON", "WEAR_NECK", "WEAR_EAR", "WEAR_UNIQUE", "WEAR_SHIELD",
+					"WEAR_ARROW", "WEAR_HAIR", "WEAR_ABILITY", "WEAR_PENDANT" };
 
-	string arWearrFlag[] = {"WEAR_BODY", "WEAR_HEAD", "WEAR_FOOTS", "WEAR_WRIST", "WEAR_WEAPON", "WEAR_NECK", "WEAR_EAR", "WEAR_UNIQUE", "WEAR_SHIELD",
-					"WEAR_ARROW", "WEAR_HAIR", "WEAR_ABILITY"};
-
-
-	int retValue = 0;
-	string* arInputString = StringSplit(inputString, "|");				//프로토 정보 내용을 단어별로 쪼갠 배열.
-	for(int i =0;i<sizeof(arWearrFlag)/sizeof(arWearrFlag[0]);i++) {
-		string tempString = arWearrFlag[i];
-		for (int j=0; j<30 ; j++)		//최대 30개 단어까지. (하드코딩)
-		{
-			string tempString2 = arInputString[j];
-			if (tempString2.compare(tempString)==0) {				//일치하는지 확인.
-				retValue = retValue + pow((float)2,(float)i);
-			}
-			
-			if(tempString2.compare("") == 0)
-				break;
-		}
-	}
-	delete []arInputString;
-	//cout << "WearFlag : " << wearFlagStr << " -> " << retValue << endl;
-
-	return retValue;
+	return get_flags_value(inputString, arWearrFlag, '|');
 }
 
 int get_Item_Immune_Value(string inputString) 
 {
+	std::vector<std::string> arImmune = {"PARA","CURSE","STUN","SLEEP","SLOW","POISON","TERROR"};
 
-	string arImmune[] = {"PARA","CURSE","STUN","SLEEP","SLOW","POISON","TERROR"};
-
-	int retValue = 0;
-	string* arInputString = StringSplit(inputString, "|");				//프로토 정보 내용을 단어별로 쪼갠 배열.
-	for(int i =0;i<sizeof(arImmune)/sizeof(arImmune[0]);i++) {
-		string tempString = arImmune[i];
-		for (int j=0; j<30 ; j++)		//최대 30개 단어까지. (하드코딩)
-		{
-			string tempString2 = arInputString[j];
-			if (tempString2.compare(tempString)==0) {				//일치하는지 확인.
-				retValue = retValue + pow((float)2,(float)i);
-			}
-			
-			if(tempString2.compare("") == 0)
-				break;
-		}
-	}
-	delete []arInputString;
-	//cout << "Immune : " << immuneStr << " -> " << retValue << endl;
-
-	return retValue;
+	return get_flags_value(inputString, arImmune, ',');
 }
 
 
@@ -696,78 +592,22 @@ int get_Mob_Size_Value(string inputString)
 
 int get_Mob_AIFlag_Value(string inputString)
 {
-	string arAIFlag[] = {"AGGR","NOMOVE","COWARD","NOATTSHINSU","NOATTCHUNJO","NOATTJINNO","ATTMOB","BERSERK","STONESKIN","GODSPEED","DEATHBLOW","REVIVE"};
+	std::vector<std::string> arAIFlag = {"AGGR","NOMOVE","COWARD","NOATTSHINSU","NOATTCHUNJO","NOATTJINNO","ATTMOB","BERSERK","STONESKIN","GODSPEED","DEATHBLOW","REVIVE"};
 
-
-	int retValue = 0;
-	string* arInputString = StringSplit(inputString, ",");				//프로토 정보 내용을 단어별로 쪼갠 배열.
-	for(int i =0;i<sizeof(arAIFlag)/sizeof(arAIFlag[0]);i++) {
-		string tempString = arAIFlag[i];
-		for (int j=0; j<30 ; j++)		//최대 30개 단어까지. (하드코딩)
-		{
-			string tempString2 = arInputString[j];
-			if (tempString2.compare(tempString)==0) {				//일치하는지 확인.
-				retValue = retValue + pow((float)2,(float)i);
-			}
-			
-			if(tempString2.compare("") == 0)
-				break;
-		}
-	}
-	delete []arInputString;
-	//cout << "AIFlag : " << aiFlagStr << " -> " << retValue << endl;
-
-	return retValue;
+	return get_flags_value(inputString, arAIFlag, ',');
 }
 int get_Mob_RaceFlag_Value(string inputString)
 {
-	string arRaceFlag[] = {"ANIMAL","UNDEAD","DEVIL","HUMAN","ORC","MILGYO","INSECT","FIRE","ICE","DESERT","TREE",
+	std::vector<std::string> arRaceFlag = {"ANIMAL","UNDEAD","DEVIL","HUMAN","ORC","MILGYO","INSECT","FIRE","ICE","DESERT","TREE",
 		"ATT_ELEC","ATT_FIRE","ATT_ICE","ATT_WIND","ATT_EARTH","ATT_DARK"};
 
-	int retValue = 0;
-	string* arInputString = StringSplit(inputString, ",");				//프로토 정보 내용을 단어별로 쪼갠 배열.
-	for(int i =0;i<sizeof(arRaceFlag)/sizeof(arRaceFlag[0]);i++) {
-		string tempString = arRaceFlag[i];
-		for (int j=0; j<30 ; j++)		//최대 30개 단어까지. (하드코딩)
-		{
-			string tempString2 = arInputString[j];
-			if (tempString2.compare(tempString)==0) {				//일치하는지 확인.
-				retValue = retValue + pow((float)2,(float)i);
-			}
-			
-			if(tempString2.compare("") == 0)
-				break;
-		}
-	}
-	delete []arInputString;
-	//cout << "Race Flag : " << raceFlagStr << " -> " << retValue << endl;
-
-	return retValue;
+	return get_flags_value(inputString, arRaceFlag, ',');
 }
 int get_Mob_ImmuneFlag_Value(string inputString)
 {
-	string arImmuneFlag[] = {"STUN","SLOW","FALL","CURSE","POISON","TERROR", "REFLECT"};
+	std::vector<std::string> arImmuneFlag = {"STUN","SLOW","FALL","CURSE","POISON","TERROR", "REFLECT"};
 
-	int retValue = 0;
-	string* arInputString = StringSplit(inputString, ",");				//프로토 정보 내용을 단어별로 쪼갠 배열.
-	for(int i =0;i<sizeof(arImmuneFlag)/sizeof(arImmuneFlag[0]);i++) {
-		string tempString = arImmuneFlag[i];
-		for (int j=0; j<30 ; j++)		//최대 30개 단어까지. (하드코딩)
-		{
-			string tempString2 = arInputString[j];
-			if (tempString2.compare(tempString)==0) {				//일치하는지 확인.
-				retValue = retValue + pow((float)2,(float)i);
-			}
-			
-			if(tempString2.compare("") == 0)
-				break;
-		}
-	}
-	delete []arInputString;
-	//cout << "Immune Flag : " << immuneFlagStr << " -> " << retValue << endl;
-
-
-	return retValue;
+	return get_flags_value(inputString, arImmuneFlag, ',');
 }
 
 
