@@ -431,8 +431,7 @@ int get_Item_AntiFlag_Value(string inputString)
 		{
 			sys_err("AntiFlag : Not existing antiflag !! (antiflag %s)", val.c_str());
 			return -1;
-		}
-			
+		}	
 	}
 
 	return retValue;
@@ -441,28 +440,44 @@ int get_Item_AntiFlag_Value(string inputString)
 int get_Item_Flag_Value(string inputString) 
 {
 
-	string arFlag[] = {"ITEM_TUNABLE", "ITEM_SAVE", "ITEM_STACKABLE", "COUNT_PER_1GOLD", "ITEM_SLOW_QUERY", "ITEM_UNIQUE",
+	std::vector<std::string> arFlag = {"ITEM_TUNABLE", "ITEM_SAVE", "ITEM_STACKABLE", "COUNT_PER_1GOLD", "ITEM_SLOW_QUERY", "ITEM_UNIQUE",
 			"ITEM_MAKECOUNT", "ITEM_IRREMOVABLE", "CONFIRM_WHEN_USE", "QUEST_USE", "QUEST_USE_MULTIPLE",
 			"QUEST_GIVE", "ITEM_QUEST", "LOG", "STACKABLE", "SLOW_QUERY", "REFINEABLE", "IRREMOVABLE", "ITEM_APPLICABLE"};
 
 
 	int retValue = 0;
-	string* arInputString = StringSplit(inputString, "|");				//프로토 정보 내용을 단어별로 쪼갠 배열.
-	for(int i =0;i<sizeof(arFlag)/sizeof(arFlag[0]);i++) {
-		string tempString = arFlag[i];
-		for (int j=0; j<30 ; j++)		//최대 30개 단어까지. (하드코딩)
+	
+	std::vector<std::string> values = split_string(inputString, '|');
+	
+	for (auto& val : values)
+	{
+		if (val.compare("NONE") == 0)
+			return 0;
+		
+		val.erase(std::remove (val.begin(), val.end(), ' '), val.end());
+		
+		bool found = false;
+		
+		int n = 0;
+		
+		for (const auto& flag : arFlag)
 		{
-			string tempString2 = arInputString[j];
-			if (tempString2.compare(tempString)==0) {				//일치하는지 확인.
-				retValue = retValue + pow((float)2,(float)i);
+			if (val.compare(flag) == 0)
+			{
+				found = true;
+				retValue += std::pow(2, n);
+				break;
 			}
 			
-			if(tempString2.compare("") == 0)
-				break;
+			++n;
 		}
+		
+		if (!found)
+		{
+			sys_err("Flag : Not existing flag !! (flag %s)", val.c_str());
+			return -1;
+		}	
 	}
-	delete []arInputString;
-	//cout << "Flag : " << flagStr << " -> " << retValue << endl;
 
 	return retValue;
 }
