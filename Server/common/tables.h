@@ -315,6 +315,7 @@ typedef struct SSimplePlayer
 	int		lAddr;
 	WORD		wPort;
 	BYTE		skill_group;
+	DWORD		dwLastPlayTime;
 } TSimplePlayer;
 
 typedef struct SAccountTable
@@ -434,6 +435,8 @@ typedef struct SPlayerTable
 	DWORD	logoff_interval;
 
 	int		aiPremiumTimes[PREMIUM_MAX_NUM];
+	
+	DWORD	last_play_time;
 } TPlayerTable;
 
 typedef struct SMobSkillLevel

@@ -1165,6 +1165,7 @@ void CHARACTER::CreatePlayerProto(TPlayerTable & tab)
 
 	tab.playtime = GetRealPoint(POINT_PLAYTIME);
 	tab.lAlignment = m_iRealAlignment;
+	tab.last_play_time = time(NULL);
 
 	if (m_posWarp.x != 0 || m_posWarp.y != 0)
 	{

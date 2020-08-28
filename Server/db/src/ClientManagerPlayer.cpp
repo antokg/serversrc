@@ -947,6 +947,7 @@ void CClientManager::__QUERY_PLAYER_CREATE(CPeer *peer, DWORD dwHandle, TPlayerC
 	pack.player.wMainPart		= packet->player_table.part_base;
 	pack.player.x			= packet->player_table.x;
 	pack.player.y			= packet->player_table.y;
+	pack.player.dwLastPlayTime = INT_MAX; // so when creating a character it is instantly first on the list
 
 	peer->EncodeHeader(HEADER_DG_PLAYER_CREATE_SUCCESS, dwHandle, sizeof(TPacketDGCreateSuccess));
 	peer->Encode(&pack, sizeof(TPacketDGCreateSuccess));
