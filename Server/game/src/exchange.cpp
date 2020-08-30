@@ -424,6 +424,8 @@ bool CExchange::Done()
 		if (!(item = m_apItems[i]))
 			continue;
 
+		item->Highlight(true);
+
 		if (item->IsDragonSoul())
 			empty_pos = victim->GetEmptyDragonSoulInventory(item);
 		else

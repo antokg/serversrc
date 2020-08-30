@@ -401,8 +401,7 @@ void CHARACTER::SetItem(TItemPos Cell, LPITEM pItem)
 			pack.vnum = pItem->GetVnum();
 			pack.flags = pItem->GetFlag();
 			pack.anti_flags	= pItem->GetAntiFlag();
-			pack.highlight = (Cell.window_type == DRAGON_SOUL_INVENTORY);
-
+			pack.highlight = pItem->IsHighlighted();
 
 			thecore_memcpy(pack.alSockets, pItem->GetSockets(), sizeof(pack.alSockets));
 			thecore_memcpy(pack.aAttr, pItem->GetAttributes(), sizeof(pack.aAttr));
@@ -439,7 +438,11 @@ void CHARACTER::SetItem(TItemPos Cell, LPITEM pItem)
 			pItem->SetWindow(DRAGON_SOUL_INVENTORY);
 			break;
 		}
+		
+		
+		pItem->Highlight(false);
 	}
+	
 }
 
 LPITEM CHARACTER::GetWear(BYTE bCell) const
@@ -5585,6 +5588,7 @@ bool CHARACTER::MoveItem(TItemPos Cell, TItemPos DestCell, BYTE count)
 			FN_copy_item_socket(item2, item);
 
 			item2->AddToCharacter(this, DestCell);
+			item2->Highlight(false);
 
 			char szBuf[51+1];
 			snprintf(szBuf, sizeof(szBuf), "%u %u %u %u ", item2->GetID(), item2->GetCount(), item->GetCount(), item->GetCount() + item2->GetCount());
@@ -5724,6 +5728,7 @@ bool CHARACTER::PickupItem(DWORD dwVID)
 
 	if (item->DistanceValid(this))
 	{
+		item->Highlight(true);
 		if (item->IsOwnership(this))
 		{
 			// 만약 주으려 하는 아이템이 엘크라면

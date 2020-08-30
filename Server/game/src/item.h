@@ -209,6 +209,9 @@ class CItem : public CEntity
 
 		void		Lock(bool f) { m_isLocked = f; }
 		bool		isLocked() const { return m_isLocked; }
+		
+		void		Highlight(bool f) { m_bHighlight = f; }
+		bool		IsHighlighted() { return m_bHighlight; }
 
 	private :
 		void		SetAttribute(int i, BYTE bType, short sValue);
@@ -266,6 +269,7 @@ class CItem : public CEntity
 		DWORD		m_dwCount;		// 개수
 		int		m_lFlag;		// 추가 flag
 		DWORD		m_dwLastOwnerPID;	// 마지막 가지고 있었던 사람의 PID
+		bool		m_bHighlight;
 
 		bool		m_bExchanging;	///< 현재 교환중 상태 
 

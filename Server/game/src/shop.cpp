@@ -292,6 +292,7 @@ int CShop::Buy(LPCHARACTER ch, BYTE pos)
 	}
 
 	ch->PointChange(POINT_GOLD, -dwPrice, false);
+	item->Highlight(true);
 
 	//세금 계산
 	DWORD dwTax = 0;

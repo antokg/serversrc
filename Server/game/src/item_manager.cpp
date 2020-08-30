@@ -412,6 +412,8 @@ LPITEM ITEM_MANAGER::CreateItem(DWORD vnum, DWORD count, DWORD id, bool bTryMagi
 	{
 		DSManager::instance().DragonSoulItemInitialize(item);
 	}
+	
+	item->Highlight(true);
 	return item;
 }
 
