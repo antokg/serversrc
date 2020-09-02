@@ -305,6 +305,7 @@ bool NewPlayerTable(TPlayerTable * table,
 	table->gold 	= 0;
 
 	table->skill_group = 0;
+	table->inventory_stages = 0;
 
 	return true;
 }
@@ -402,6 +403,7 @@ bool NewPlayerTable2(TPlayerTable * table, const char * name, BYTE race, BYTE sh
 	table->gold 	= 0;
 
 	table->skill_group = 0;
+	table->inventory_stages = 0;
 
 	return true;
 }

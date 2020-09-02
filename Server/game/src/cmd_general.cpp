@@ -2444,7 +2444,7 @@ ACMD(do_ride)
 	    return;
 	}
 
-	for (BYTE i=0; i<INVENTORY_MAX_NUM; ++i)
+	for (BYTE i=0; i<ch->GetExtendInvenMax(); ++i)
 	{
 	    LPITEM item = ch->GetInventoryItem(i);
 	    if (NULL == item)

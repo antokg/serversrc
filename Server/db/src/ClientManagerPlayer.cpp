@@ -117,6 +117,7 @@ size_t CreatePlayerSaveQuery(char * pszQuery, size_t querySize, TPlayerTable * p
 			"horse_hp_droptime = %u, "
 			"horse_stamina = %d, "
 			"horse_skill_point = %d, "
+			"inventory_stages = %d, "
 			,
 		GetTablePostfix(),
 		pkTab->job,
@@ -157,7 +158,8 @@ size_t CreatePlayerSaveQuery(char * pszQuery, size_t querySize, TPlayerTable * p
 		pkTab->horse.sHealth,
 		pkTab->horse.dwHorseHealthDropTime,
 		pkTab->horse.sStamina,
-		pkTab->horse_skill_point);
+		pkTab->horse_skill_point,
+		pkTab->inventory_stages);
 
 	// Binary 로 바꾸기 위한 임시 공간
 	static char text[8192 + 1];
@@ -366,7 +368,7 @@ void CClientManager::QUERY_PLAYER_LOAD(CPeer * peer, DWORD dwHandle, TPlayerLoad
 				"gold,level,level_step,st,ht,dx,iq,exp,"
 				"stat_point,skill_point,sub_skill_point,stat_reset_count,part_base,part_hair,"
 				"skill_level,quickslot,skill_group,alignment,mobile,horse_level,horse_riding,horse_hp,horse_hp_droptime,horse_stamina,"
-				"UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(last_play),horse_skill_point FROM player%s WHERE id=%d",
+				"UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(last_play),horse_skill_point, inventory_stages FROM player%s WHERE id=%d",
 				GetTablePostfix(), packet->player_id);
 
 		ClientHandleInfo * pkInfo = new ClientHandleInfo(dwHandle, packet->player_id);
@@ -519,6 +521,7 @@ bool CreatePlayerTableFromRes(MYSQL_RES * res, TPlayerTable * pkTab)
 	str_to_number(pkTab->horse.sStamina, row[col++]);
 	str_to_number(pkTab->logoff_interval, row[col++]);
 	str_to_number(pkTab->horse_skill_point, row[col++]);
+	str_to_number(pkTab->inventory_stages, row[col++]);
 
 	// reset sub_skill_point
 	{

@@ -224,6 +224,7 @@ LPITEM CHARACTER::GetInventoryItem(WORD wCell) const
 {
 	return GetItem(TItemPos(INVENTORY, wCell));
 }
+
 LPITEM CHARACTER::GetItem(TItemPos Cell) const
 {
 	if (!IsValidItemPosition(Cell))
@@ -233,13 +234,19 @@ LPITEM CHARACTER::GetItem(TItemPos Cell) const
 	switch (window_type)
 	{
 	case INVENTORY:
-	case EQUIPMENT:
-		if (wCell >= INVENTORY_AND_EQUIP_SLOT_MAX)
+		if (wCell >= INVENTORY_MAX_NUM)
 		{
 			sys_err("CHARACTER::GetInventoryItem: invalid item cell %d", wCell);
 			return NULL;
 		}
 		return m_pointsInstant.pItems[wCell];
+	case EQUIPMENT:
+		if (wCell >= EQUIPMENT_MAX)
+		{
+			sys_err("CHARACTER::GetEquipmentItem: invalid item cell %d", wCell);
+			return NULL;
+		}
+		return m_pointsInstant.pEquipment[wCell];
 	case DRAGON_SOUL_INVENTORY:
 		if (wCell >= DRAGON_SOUL_INVENTORY_MAX_NUM)
 		{
@@ -273,12 +280,22 @@ void CHARACTER::SetItem(TItemPos Cell, LPITEM pItem)
 	// 기본 인벤토리
 	switch(window_type)
 	{
-	case INVENTORY:
 	case EQUIPMENT:
 		{
-			if (wCell >= INVENTORY_AND_EQUIP_SLOT_MAX)
+			if (wCell >= EQUIPMENT_MAX)
 			{
-				sys_err("CHARACTER::SetItem: invalid item cell %d", wCell);
+				sys_err("CHARACTER::SetItem(equipment): invalid item cell %d", wCell);
+				return;
+			}
+
+			m_pointsInstant.pEquipment[wCell] = pItem;
+		}
+		break;
+	case INVENTORY:
+		{
+			if (wCell >= INVENTORY_MAX_NUM)
+			{
+				sys_err("CHARACTER::SetItem(inventory): invalid item cell %d", wCell);
 				return;
 			}
 
@@ -427,18 +444,18 @@ void CHARACTER::SetItem(TItemPos Cell, LPITEM pItem)
 		pItem->SetCell(this, wCell);
 		switch (window_type)
 		{
-		case INVENTORY:
 		case EQUIPMENT:
-			if ((wCell < INVENTORY_MAX_NUM) || (BELT_INVENTORY_SLOT_START <= wCell && BELT_INVENTORY_SLOT_END > wCell))
-				pItem->SetWindow(INVENTORY);
-			else
-				pItem->SetWindow(EQUIPMENT);
+			pItem->SetWindow(EQUIPMENT);
+			break;
+		case INVENTORY:
+			pItem->SetWindow(INVENTORY);
 			break;
 		case DRAGON_SOUL_INVENTORY:
 			pItem->SetWindow(DRAGON_SOUL_INVENTORY);
 			break;
+		default:
+			sys_err("window type %d not implemented yet", window_type);
 		}
-		
 		
 		pItem->Highlight(false);
 	}
@@ -448,13 +465,13 @@ void CHARACTER::SetItem(TItemPos Cell, LPITEM pItem)
 LPITEM CHARACTER::GetWear(BYTE bCell) const
 {
 	// > WEAR_MAX_NUM : 용혼석 슬롯들.
-	if (bCell >= WEAR_MAX_NUM + DRAGON_SOUL_DECK_MAX_NUM * DS_SLOT_MAX)
+	if (bCell >= EQUIPMENT_MAX)
 	{
 		sys_err("CHARACTER::GetWear: invalid wear cell %d", bCell);
 		return NULL;
 	}
 
-	return m_pointsInstant.pItems[INVENTORY_MAX_NUM + bCell];
+	return m_pointsInstant.pEquipment[bCell];
 }
 
 void CHARACTER::SetWear(BYTE bCell, LPITEM item)
@@ -466,7 +483,7 @@ void CHARACTER::SetWear(BYTE bCell, LPITEM item)
 		return;
 	}
 
-	SetItem(TItemPos (INVENTORY, INVENTORY_MAX_NUM + bCell), item);
+	SetItem(TItemPos (EQUIPMENT, bCell), item);
 
 	if (!item && bCell == WEAR_WEAPON)
 	{
@@ -484,7 +501,21 @@ void CHARACTER::ClearItem()
 	int		i;
 	LPITEM	item;
 	
-	for (i = 0; i < INVENTORY_AND_EQUIP_SLOT_MAX; ++i)
+	for (i = 0; i < EQUIPMENT_MAX; i++)
+	{
+		if ((item = GetItem(TItemPos(EQUIPMENT, i))))
+		{
+			item->SetSkipSave(true);
+			ITEM_MANAGER::instance().FlushDelayedSave(item);
+			
+			item->RemoveFromCharacter();
+			M2_DESTROY_ITEM(item);
+			
+			SyncQuickslot(QUICKSLOT_TYPE_ITEM, i, 255);
+		}
+	}
+	
+	for (i = 0; i < INVENTORY_MAX_NUM; ++i)
 	{
 		if ((item = GetInventoryItem(i)))
 		{
@@ -522,7 +553,7 @@ bool CHARACTER::IsEmptyItemGrid(TItemPos Cell, BYTE bSize, int iExceptionCell) c
 			// 따라서 iExceptionCell에 1을 더해 비교한다.
 			++iExceptionCell;
 
-			if (Cell.IsBeltInventoryPosition())
+			/*if (Cell.IsBeltInventoryPosition())
 			{
 				LPITEM beltItem = GetWear(WEAR_BELT);
 
@@ -544,7 +575,9 @@ bool CHARACTER::IsEmptyItemGrid(TItemPos Cell, BYTE bSize, int iExceptionCell) c
 					return true;
 
 			}
-			else if (bCell >= INVENTORY_MAX_NUM)
+			else */
+			
+			if (bCell >= GetExtendInvenMax())
 				return false;
 
 			if (m_pointsInstant.bItemGrid[bCell])
@@ -555,16 +588,16 @@ bool CHARACTER::IsEmptyItemGrid(TItemPos Cell, BYTE bSize, int iExceptionCell) c
 						return true;
 
 					int j = 1;
-					BYTE bPage = bCell / (INVENTORY_MAX_NUM / 2);
+					BYTE bPage = bCell / INVENTORY_PAGE_SIZE;
 
 					do
 					{
 						BYTE p = bCell + (5 * j);
 
-						if (p >= INVENTORY_MAX_NUM)
+						if (p >= GetExtendInvenMax())
 							return false;
 
-						if (p / (INVENTORY_MAX_NUM / 2) != bPage)
+						if (p / INVENTORY_PAGE_SIZE != bPage)
 							return false;
 
 						if (m_pointsInstant.bItemGrid[p])
@@ -585,16 +618,16 @@ bool CHARACTER::IsEmptyItemGrid(TItemPos Cell, BYTE bSize, int iExceptionCell) c
 			else
 			{
 				int j = 1;
-				BYTE bPage = bCell / (INVENTORY_MAX_NUM / 2);
+				BYTE bPage = bCell / INVENTORY_PAGE_SIZE;
 
 				do
 				{
 					BYTE p = bCell + (5 * j);
 
-					if (p >= INVENTORY_MAX_NUM)
+					if (p >= GetExtendInvenMax())
 						return false;
 
-					if (p / (INVENTORY_MAX_NUM / 2) != bPage)
+					if (p / INVENTORY_PAGE_SIZE != bPage)
 						return false;
 
 					if (m_pointsInstant.bItemGrid[p])
@@ -677,7 +710,7 @@ int CHARACTER::GetEmptyInventory(BYTE size) const
 {
 	// NOTE: 현재 이 함수는 아이템 지급, 획득 등의 행위를 할 때 인벤토리의 빈 칸을 찾기 위해 사용되고 있는데,
 	//		벨트 인벤토리는 특수 인벤토리이므로 검사하지 않도록 한다. (기본 인벤토리: INVENTORY_MAX_NUM 까지만 검사)
-	for ( int i = 0; i < INVENTORY_MAX_NUM; ++i)
+	for ( int i = 0; i < GetExtendInvenMax(); ++i)
 		if (IsEmptyItemGrid(TItemPos (INVENTORY, i), size))
 			return i;
 	return -1;
@@ -715,11 +748,11 @@ int CHARACTER::CountEmptyInventory() const
 {
 	int	count = 0;
 
-	for (int i = 0; i < INVENTORY_MAX_NUM; ++i)
+	for (int i = 0; i < GetExtendInvenMax(); ++i)
 		if (GetInventoryItem(i))
 			count += GetInventoryItem(i)->GetSize();
 
-	return (INVENTORY_MAX_NUM - count);
+	return (GetExtendInvenMax() - count);
 }
 
 void TransformRefineItem(LPITEM pkOldItem, LPITEM pkNewItem)
@@ -1254,7 +1287,7 @@ bool CHARACTER::DoRefineWithScroll(LPITEM item)
 
 bool CHARACTER::RefineInformation(BYTE bCell, BYTE bType, int iAdditionalCell)
 {
-	if (bCell > INVENTORY_MAX_NUM)
+	if (bCell > GetExtendInvenMax())
 		return false;
 
 	LPITEM item = GetInventoryItem(bCell);
@@ -4049,6 +4082,13 @@ bool CHARACTER::UseItemEx(LPITEM item, TItemPos DestCell)
 									}
 								}
 								break;
+							case EXTEND_INVENTORY_1:
+							case EXTEND_INVENTORY_2:
+								{
+									CheckExtendInventoryCount(item->GetVnum());
+								}
+								break;
+								
 						}
 						break;
 
@@ -5467,7 +5507,7 @@ bool CHARACTER::MoveItem(TItemPos Cell, TItemPos DestCell, BYTE count)
 	if (item->GetCount() < count)
 		return false;
 
-	if (INVENTORY == Cell.window_type && Cell.cell >= INVENTORY_MAX_NUM && IS_SET(item->GetFlag(), ITEM_FLAG_IRREMOVABLE))
+	if (EQUIPMENT == Cell.window_type && IS_SET(item->GetFlag(), ITEM_FLAG_IRREMOVABLE))
 		return false;
 
 	if (true == item->isLocked())
@@ -5486,11 +5526,11 @@ bool CHARACTER::MoveItem(TItemPos Cell, TItemPos DestCell, BYTE count)
 	}
 
 	// 기획자의 요청으로 벨트 인벤토리에는 특정 타입의 아이템만 넣을 수 있다.
-	if (DestCell.IsBeltInventoryPosition() && false == CBeltInventoryHelper::CanMoveIntoBeltInventory(item))
-	{
-		ChatPacket(CHAT_TYPE_INFO, LC_TEXT("이 아이템은 벨트 인벤토리로 옮길 수 없습니다."));			
-		return false;
-	}
+	// if (DestCell.IsBeltInventoryPosition() && false == CBeltInventoryHelper::CanMoveIntoBeltInventory(item))
+	// {
+		// ChatPacket(CHAT_TYPE_INFO, LC_TEXT("이 아이템은 벨트 인벤토리로 옮길 수 없습니다."));			
+		// return false;
+	// }
 
 	// 이미 착용중인 아이템을 다른 곳으로 옮기는 경우, '장책 해제' 가능한 지 확인하고 옮김
 	if (Cell.IsEquipPosition() && !CanUnequipNow(item))
@@ -5505,7 +5545,7 @@ bool CHARACTER::MoveItem(TItemPos Cell, TItemPos DestCell, BYTE count)
 			return false;
 		}
 
-		EquipItem(item, DestCell.cell - INVENTORY_MAX_NUM);
+		EquipItem(item, DestCell.cell);
 	}
 	else
 	{
@@ -5748,7 +5788,7 @@ bool CHARACTER::PickupItem(DWORD dwVID)
 				{
 					BYTE bCount = item->GetCount();
 
-					for (int i = 0; i < INVENTORY_MAX_NUM; ++i)
+					for (int i = 0; i < GetExtendInvenMax(); ++i)
 					{
 						LPITEM item2 = GetInventoryItem(i);
 
@@ -5891,21 +5931,22 @@ bool CHARACTER::PickupItem(DWORD dwVID)
 	return false;
 }
 
-bool CHARACTER::SwapItem(BYTE bCell, BYTE bDestCell)
+bool CHARACTER::SwapItem(TItemPos srcCell, TItemPos destCell)
 {
 	if (!CanHandleItem())
 		return false;
 
-	TItemPos srcCell(INVENTORY, bCell), destCell(INVENTORY, bDestCell);
-
 	// 올바른 Cell 인지 검사
 	// 용혼석은 Swap할 수 없으므로, 여기서 걸림.
 	//if (bCell >= INVENTORY_MAX_NUM + WEAR_MAX_NUM || bDestCell >= INVENTORY_MAX_NUM + WEAR_MAX_NUM)
-	if (srcCell.IsDragonSoulEquipPosition() || destCell.IsDragonSoulEquipPosition())
-		return false;
+	// if (srcCell.IsDragonSoulEquipPosition() || destCell.IsDragonSoulEquipPosition())
+		// return false;
+	
+	BYTE bCell = srcCell.cell;
+	BYTE bDestCell = destCell.cell;
 
 	// 같은 CELL 인지 검사
-	if (bCell == bDestCell)
+	if (srcCell == destCell)
 		return false;
 
 	// 둘 다 장비창 위치면 Swap 할 수 없다.
@@ -5918,12 +5959,12 @@ bool CHARACTER::SwapItem(BYTE bCell, BYTE bDestCell)
 	if (srcCell.IsEquipPosition())
 	{
 		item1 = GetInventoryItem(bDestCell);
-		item2 = GetInventoryItem(bCell);
+		item2 = GetItem(TItemPos(EQUIPMENT, bCell));
 	}
 	else
 	{
 		item1 = GetInventoryItem(bCell);
-		item2 = GetInventoryItem(bDestCell);
+		item2 = GetItem(TItemPos(EQUIPMENT, bDestCell));
 	}
 
 	if (!item1 || !item2)
@@ -5942,7 +5983,7 @@ bool CHARACTER::SwapItem(BYTE bCell, BYTE bDestCell)
 	// 바꿀 아이템이 장비창에 있으면
 	if (TItemPos(EQUIPMENT, item2->GetCell()).IsEquipPosition())
 	{
-		BYTE bEquipCell = item2->GetCell() - INVENTORY_MAX_NUM;
+		BYTE bEquipCell = item2->GetCell();
 		BYTE bInvenCell = item1->GetCell();
 
 		// 착용중인 아이템을 벗을 수 있고, 착용 예정 아이템이 착용 가능한 상태여야만 진행
@@ -6063,7 +6104,7 @@ bool CHARACTER::EquipItem(LPITEM item, int iCandidateCell)
 	{
 		// 같은 타입의 용혼석이 이미 들어가 있다면 착용할 수 없다.
 		// 용혼석은 swap을 지원하면 안됨.
-		if(GetInventoryItem(INVENTORY_MAX_NUM + iWearCell))
+		if(GetInventoryItem(iWearCell))
 		{
 			ChatPacket(CHAT_TYPE_INFO, "이미 같은 종류의 용혼석을 착용하고 있습니다.");
 			return false;
@@ -6084,7 +6125,7 @@ bool CHARACTER::EquipItem(LPITEM item, int iCandidateCell)
 			if (item->GetWearFlag() == WEARABLE_ABILITY) 
 				return false;
 
-			if (false == SwapItem(item->GetCell(), INVENTORY_MAX_NUM + iWearCell))
+			if (false == SwapItem(TItemPos(item->GetWindow(), item->GetCell()), TItemPos(EQUIPMENT, iWearCell)))
 			{
 				return false;
 			}
@@ -6477,7 +6518,7 @@ LPITEM CHARACTER::AutoGiveItem(DWORD dwItemVnum, BYTE bCount, int iRarePct, bool
 
 	if (p->dwFlags & ITEM_FLAG_STACKABLE && p->bType != ITEM_BLEND) 
 	{
-		for (int i = 0; i < INVENTORY_MAX_NUM; ++i)
+		for (int i = 0; i < GetExtendInvenMax(); ++i)
 		{
 			LPITEM item = GetInventoryItem(i);
 
@@ -6518,7 +6559,7 @@ LPITEM CHARACTER::AutoGiveItem(DWORD dwItemVnum, BYTE bCount, int iRarePct, bool
 
 	if (item->GetType() == ITEM_BLEND)
 	{
-		for (int i=0; i < INVENTORY_MAX_NUM; i++)
+		for (int i=0; i < GetExtendInvenMax(); i++)
 		{
 			LPITEM inv_item = GetInventoryItem(i);
 
@@ -7336,8 +7377,9 @@ bool CHARACTER::IsValidItemPosition(TItemPos Pos) const
 		return false;
 
 	case INVENTORY:
+		return cell < GetExtendInvenMax();
 	case EQUIPMENT:
-		return cell < (INVENTORY_AND_EQUIP_SLOT_MAX);
+		return cell < EQUIPMENT_MAX;
 
 	case DRAGON_SOUL_INVENTORY:
 		return cell < (DRAGON_SOUL_INVENTORY_MAX_NUM);
@@ -7489,3 +7531,81 @@ bool CHARACTER::CanUnequipNow(const LPITEM item, const TItemPos& srcCell, const 
 
 	return true;
 }
+
+/* EXTEND INVENTORY */
+void CHARACTER::CheckExtendInventoryCount(DWORD dwVnum)
+{
+	if (GetDesc())
+	{
+		TPacketGCExInven pack;
+		pack.header = HEADER_GC_EX_INVEN;
+		pack.item_vnum = dwVnum;
+		
+		DWORD vnum1 = EXTEND_INVENTORY_1;
+		DWORD vnum2 = EXTEND_INVENTORY_2;
+		BYTE currentStage = GetExtendInvenStage();
+		
+		if (currentStage >= INVENTORY_STAGE_MAX)
+		{
+			pack.msg = EX_INVEN_FAIL_FOURTH_PAGE_STAGE_MAX;
+			pack.count = 0;
+		}
+		else
+		{
+			
+			DWORD count = CountSpecifyItem(vnum1) + CountSpecifyItem(vnum2);
+			DWORD requiredCount = extend_inventory_need_count[currentStage];
+			
+			if (count < requiredCount)
+			{
+				pack.msg = EX_INVEN_FAIL_FALL_SHORT;
+				pack.count = requiredCount - count;
+			}
+			else
+			{
+				pack.msg = EX_INVEN_SUCCESS;
+				pack.count = requiredCount;
+			}
+		}
+	
+		GetDesc()->Packet(&pack, sizeof(TPacketGCExInven));
+	}
+}
+
+void CHARACTER::ExtendInventoryAccept()
+{
+	DWORD vnum1, vnum2, count1, count2, requiredCount;
+	
+	vnum1 = EXTEND_INVENTORY_1;
+	vnum2 = EXTEND_INVENTORY_2;
+	BYTE currentStage = GetExtendInvenStage();
+	requiredCount = extend_inventory_need_count[currentStage];
+	
+	count1 = CountSpecifyItem(vnum1);
+	count2 = CountSpecifyItem(vnum2);
+	
+	if (count1+count2 < requiredCount)
+	{
+		sys_err("not enough inventory expansion item pid %d", GetPlayerID());
+		return;
+	}
+	
+	if (count1 >= requiredCount)
+	{
+		count1 = requiredCount;
+		count2 = 0;
+	}
+	else
+	{
+		count2 = requiredCount - count1;
+	}
+	
+	RemoveSpecifyItem(EXTEND_INVENTORY_1, count1);
+	RemoveSpecifyItem(EXTEND_INVENTORY_2, count2);
+	PointChange(POINT_INVENTORY_STAGES, currentStage + 1);
+	sys_log(0, "extend inventory success count1 %d count2 %d stage %d pid %d", count1, count2, currentStage, GetPlayerID());
+	char buf[128];
+	snprintf(buf, sizeof(buf), "stage %d count1 %d count2 %d", currentStage, count1, count2);
+	LogManager::instance().CharLog(this, currentStage+1, "EXTEND_INVENTORY", buf);
+}
+/* END EXTEND INVENTORY */

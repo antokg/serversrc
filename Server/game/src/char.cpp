@@ -1141,6 +1141,7 @@ void CHARACTER::CreatePlayerProto(TPlayerTable & tab)
 	tab.job			= m_points.job;
 	tab.part_base	= m_pointsInstant.bBasePart;
 	tab.skill_group	= m_points.skill_group;
+	tab.inventory_stages = GetExtendInvenStage();
 
 	DWORD dwPlayedTime = (get_dword_time() - m_dwPlayStartTime);
 
@@ -1232,7 +1233,6 @@ void CHARACTER::CreatePlayerProto(TPlayerTable & tab)
 	tab.horse = GetHorseData();
 }
 
-
 void CHARACTER::SaveReal()
 {
 	if (m_bSkipSave)
@@ -1268,8 +1268,12 @@ void CHARACTER::FlushDelayedSaveItem()
 	// 저장 안된 소지품을 전부 저장시킨다.
 	LPITEM item;
 
-	for (int i = 0; i < INVENTORY_AND_EQUIP_SLOT_MAX; ++i)
+	for (int i = 0; i < INVENTORY_MAX_NUM; ++i)
 		if ((item = GetInventoryItem(i)))
+			ITEM_MANAGER::instance().FlushDelayedSave(item);
+		
+	for (int i = 0; i < EQUIPMENT_MAX; ++i)
+		if ((item = GetItem(TItemPos(EQUIPMENT, i))))
 			ITEM_MANAGER::instance().FlushDelayedSave(item);
 }
 
@@ -1568,6 +1572,8 @@ void CHARACTER::PointsPacket()
 
 	for (int i = POINT_ST; i < POINT_MAX_NUM; ++i)
 		pack.points[i] = GetPoint(i);
+	
+	pack.points[POINT_INVENTORY_STAGES] = GetExtendInvenStage();
 
 	GetDesc()->Packet(&pack, sizeof(TPacketGCPoints));
 }
@@ -1742,6 +1748,8 @@ void CHARACTER::SetPlayerProto(const TPlayerTable * t)
 
 	SetMapIndex(t->lMapIndex);
 	SetXYZ(t->x, t->y, t->z);
+	
+	SetExtendInvenStage(t->inventory_stages);
 
 	ComputePoints();
 
@@ -2308,19 +2316,20 @@ void CHARACTER::ComputePoints()
 	// ComputePoints에서는 케릭터의 모든 속성값을 초기화하고,
 	// 아이템, 버프 등에 관련된 모든 속성값을 재계산하기 때문에,
 	// 용혼석 시스템도 ActiveDeck에 있는 모든 용혼석의 속성값을 다시 적용시켜야 한다.
-	if (DragonSoul_IsDeckActivated())
-	{
-		for (int i = WEAR_MAX_NUM + DS_SLOT_MAX * DragonSoul_GetActiveDeck(); 
-			i < WEAR_MAX_NUM + DS_SLOT_MAX * (DragonSoul_GetActiveDeck() + 1); i++)	
-		{
-			LPITEM pItem = GetWear(i);
-			if (pItem)
-			{
-				if (DSManager::instance().IsTimeLeftDragonSoul(pItem))
-					pItem->ModifyPoints(true);
-			}
-		}
-	}
+	// TODO recheck this part
+	// if (DragonSoul_IsDeckActivated())
+	// {
+		// for (int i = WEAR_MAX_NUM + DS_SLOT_MAX * DragonSoul_GetActiveDeck(); 
+			// i < WEAR_MAX_NUM + DS_SLOT_MAX * (DragonSoul_GetActiveDeck() + 1); i++)	
+		// {
+			// LPITEM pItem = GetWear(i);
+			// if (pItem)
+			// {
+				// if (DSManager::instance().IsTimeLeftDragonSoul(pItem))
+					// pItem->ModifyPoints(true);
+			// }
+		// }
+	// }
 
 	if (GetHP() > GetMaxHP())
 		PointChange(POINT_HP, GetMaxHP() - GetHP());
@@ -3559,6 +3568,12 @@ void CHARACTER::PointChange(BYTE type, int amount, bool bAmount, bool bBroadcast
 				SetPoint(type, old_val + amount);
 				val = GetPoint(type);
 				BuffOnAttr_ValueChange(type, old_val, val);
+			}
+			break;
+		case POINT_INVENTORY_STAGES:
+			{
+				SetExtendInvenStage(amount);
+				val = GetExtendInvenStage();
 			}
 			break;
 
@@ -7159,3 +7174,11 @@ int	CHARACTER::GetSkillPowerByLevel(int level, bool bMob) const
 {
 	return CTableBySkill::instance().GetSkillPowerByLevelFromType(GetJob(), GetSkillGroup(), MINMAX(0, level, SKILL_MAX_LEVEL), bMob); 
 }
+
+/* EXTEND INVENTORY */
+BYTE CHARACTER::GetExtendInvenMax() const
+{
+	return INVENTORY_PAGE_SIZE * (INVENTORY_PAGE_COUNT - EX_INV_PAGE_COUNT) + GetExtendInvenStage() * INVENTORY_COL_COUNT;
+}
+/* END EXTEND INVENTORY */
+

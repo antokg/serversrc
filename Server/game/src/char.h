@@ -284,6 +284,8 @@ enum EPointTypes
 
 	POINT_RESIST_CRITICAL = 136,		// 크리티컬 저항	: 상대의 크리티컬 확률을 감소
 	POINT_RESIST_PENETRATE = 137,		// 관통타격 저항	: 상대의 관통타격 확률을 감소
+	
+	POINT_INVENTORY_STAGES = 138, // temporary 138
 
 	//POINT_MAX_NUM = 129	common/length.h
 };
@@ -373,6 +375,7 @@ typedef struct character_point
 	int				stamina;
 
 	BYTE			skill_group;
+	BYTE			bExtendInvenStage;
 } CHARACTER_POINT;
 
 /* 저장되지 않는 캐릭터 데이터 */
@@ -393,9 +396,11 @@ typedef struct character_point_instant
 	DWORD			dwLastShoutPulse;
 
 	WORD			parts[PART_MAX_NUM];
+	
+	LPITEM			pEquipment[EQUIPMENT_MAX];
 
-	LPITEM			pItems[INVENTORY_AND_EQUIP_SLOT_MAX];
-	BYTE			bItemGrid[INVENTORY_AND_EQUIP_SLOT_MAX];
+	LPITEM			pItems[INVENTORY_MAX_NUM];
+	BYTE			bItemGrid[INVENTORY_MAX_NUM];
 
 	// 용혼석 인벤토리.
 	LPITEM			pDSItems[DRAGON_SOUL_INVENTORY_MAX_NUM];
@@ -753,7 +758,7 @@ class CHARACTER : public CEntity, public CFSM, public CHorseRider
 		void			SetPolymorph(DWORD dwRaceNum, bool bMaintainStat = false);
 		DWORD			GetPolymorphVnum() const	{ return m_dwPolymorphRace; }
 		int				GetPolymorphPower() const;
-
+		
 		// FISING	
 		void			fishing();
 		void			fishing_take();
@@ -1120,7 +1125,7 @@ class CHARACTER : public CEntity, public CFSM, public CHorseRider
 		// 착용중인 item을 벗을 수 있는 지 확인하고, 불가능 하다면 캐릭터에게 이유를 알려주는 함수
 		bool			CanUnequipNow(const LPITEM item, const TItemPos& srcCell = NPOS, const TItemPos& destCell = NPOS);
 
-		bool			SwapItem(BYTE bCell, BYTE bDestCell);
+		bool			SwapItem(TItemPos srcCell, TItemPos destCell);
 		LPITEM			AutoGiveItem(DWORD dwItemVnum, BYTE bCount=1, int iRarePct = -1, bool bMsg = true);
 		void			AutoGiveItem(LPITEM item, bool longOwnerShip = false);
 		
@@ -2020,6 +2025,16 @@ class CHARACTER : public CEntity, public CFSM, public CHorseRider
 		const timeval&	GetLastSyncTime() { return m_tvLastSyncTime; }
 		void			SetSyncHackCount(int iCount) { m_iSyncHackCount = iCount;}
 		int				GetSyncHackCount() { return m_iSyncHackCount; }
+		
+	/* EXTEND INVENTORY */
+	
+	public:
+		BYTE		GetExtendInvenStage() const { return m_points.bExtendInvenStage; }
+		void		SetExtendInvenStage(BYTE stage) { m_points.bExtendInvenStage = stage; }
+		void		CheckExtendInventoryCount(DWORD dwVnum);
+		void		ExtendInventoryAccept();
+		BYTE		GetExtendInvenMax() const;
+	/* END EXTEND INVENTORY */
 };
 
 ESex GET_SEX(LPCHARACTER ch);

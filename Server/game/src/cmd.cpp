@@ -252,6 +252,7 @@ ACMD (do_use_item);
 ACMD (do_dragon_soul);
 ACMD (do_ds_list);
 ACMD (do_clear_affect);
+ACMD (do_extend_inventory);
 
 struct command_info cmd_info[] =
 {
@@ -539,6 +540,7 @@ struct command_info cmd_info[] =
 	{ "dragon_soul",				do_dragon_soul,				0,	POS_DEAD,	GM_PLAYER	},
 	{ "ds_list",				do_ds_list,				0,	POS_DEAD,	GM_PLAYER	},
 	{ "do_clear_affect", do_clear_affect, 	0, POS_DEAD,		GM_LOW_WIZARD},
+	{ "extend_inventory",	do_extend_inventory,	0,	POS_DEAD,	GM_IMPLEMENTOR },
 
 	{ "\n",		NULL,			0,			POS_DEAD,	GM_IMPLEMENTOR	}  /* 반드시 이 것이 마지막이어야 한다. */
 };

@@ -12,7 +12,13 @@ enum EMisc
 	ACCOUNT_STATUS_MAX_LEN	= 8,
 	CHARACTER_NAME_MAX_LEN	= 24,
 	SHOP_SIGN_MAX_LEN		= 32,
-	INVENTORY_MAX_NUM		= 90,
+	INVENTORY_MAX_NUM		= 180,
+	INVENTORY_STAGE_MAX		= 18,
+	INVENTORY_PAGE_COUNT	= 4,
+	EX_INV_PAGE_COUNT		= 2,
+	INVENTORY_COL_COUNT		= 5,
+	INVENTORY_ROW_COUNT		= 9,
+	INVENTORY_PAGE_SIZE		= INVENTORY_COL_COUNT * INVENTORY_ROW_COUNT,
 	ABILITY_MAX_NUM			= 50,
 	EMPIRE_MAX_NUM			= 4,
 	BANWORD_MAX_LEN			= 24,
@@ -75,24 +81,6 @@ enum EMisc
 	BELT_INVENTORY_SLOT_HEIGHT= 4,
 
 	BELT_INVENTORY_SLOT_COUNT = BELT_INVENTORY_SLOT_WIDTH * BELT_INVENTORY_SLOT_HEIGHT,
-
-
-/**
-	 **** 현재까지 할당 된 아이템 영역 정리 (DB상 Item Position) ****
-	+------------------------------------------------------+ 0
-	| 캐릭터 기본 인벤토리 (45칸 * 2페이지) 90칸           | 
-	+------------------------------------------------------+ 90 = INVENTORY_MAX_NUM(90)
-	| 캐릭터 장비 창 (착용중인 아이템) 32칸                |
-	+------------------------------------------------------+ 122 = INVENTORY_MAX_NUM(90) + WEAR_MAX_NUM(32)
-	| 용혼석 장비 창 (착용중인 용혼석) 12칸                | 
-	+------------------------------------------------------+ 134 = 122 + DS_SLOT_MAX(6) * DRAGON_SOUL_DECK_MAX_NUM(2)
-	| 용혼석 장비 창 예약 (아직 미사용) 18칸               | 
-	+------------------------------------------------------+ 152 = 134 + DS_SLOT_MAX(6) * DRAGON_SOUL_DECK_RESERVED_MAX_NUM(3)
-	| 벨트 인벤토리 (벨트 착용시에만 벨트 레벨에 따라 활성)|
-	+------------------------------------------------------+ 168 = 152 + BELT_INVENTORY_SLOT_COUNT(16) = INVENTORY_AND_EQUIP_CELL_MAX
-	| 미사용                                               |
-	+------------------------------------------------------+ ??
-*/
 };
 
 enum EWearPositions
@@ -744,14 +732,16 @@ enum EDragonSoulRefineWindowSize
 
 enum EMisc2
 {
-	DRAGON_SOUL_EQUIP_SLOT_START = INVENTORY_MAX_NUM + WEAR_MAX_NUM,
+	DRAGON_SOUL_EQUIP_SLOT_START = WEAR_MAX_NUM,
 	DRAGON_SOUL_EQUIP_SLOT_END = DRAGON_SOUL_EQUIP_SLOT_START + (DS_SLOT_MAX * DRAGON_SOUL_DECK_MAX_NUM),
 	DRAGON_SOUL_EQUIP_RESERVED_SLOT_END = DRAGON_SOUL_EQUIP_SLOT_END + (DS_SLOT_MAX * DRAGON_SOUL_DECK_RESERVED_MAX_NUM),
+	
+	EQUIPMENT_MAX = DRAGON_SOUL_EQUIP_SLOT_END,
 
-	BELT_INVENTORY_SLOT_START = DRAGON_SOUL_EQUIP_RESERVED_SLOT_END,
+	BELT_INVENTORY_SLOT_START = 0,
 	BELT_INVENTORY_SLOT_END = BELT_INVENTORY_SLOT_START + BELT_INVENTORY_SLOT_COUNT,
 
-	INVENTORY_AND_EQUIP_SLOT_MAX = BELT_INVENTORY_SLOT_END,
+	// INVENTORY_AND_EQUIP_SLOT_MAX = BELT_INVENTORY_SLOT_END,
 };
 
 #pragma pack(push, 1)
@@ -779,9 +769,11 @@ typedef struct SItemPos
 		case RESERVED_WINDOW:
 			return false;
 		case INVENTORY:
+			return cell < INVENTORY_MAX_NUM;
 		case EQUIPMENT:
+			return cell < EQUIPMENT_MAX;
 		case BELT_INVENTORY:
-			return cell < INVENTORY_AND_EQUIP_SLOT_MAX;
+			return cell < BELT_INVENTORY_SLOT_END;
 		case DRAGON_SOUL_INVENTORY:
 			return cell < (DRAGON_SOUL_INVENTORY_MAX_NUM);
 		// 동적으로 크기가 정해지는 window는 valid 체크를 할 수가 없다.
@@ -796,8 +788,7 @@ typedef struct SItemPos
 	
 	bool IsEquipPosition() const
 	{
-		return ((INVENTORY == window_type || EQUIPMENT == window_type) && cell >= INVENTORY_MAX_NUM && cell < INVENTORY_MAX_NUM + WEAR_MAX_NUM)
-			|| IsDragonSoulEquipPosition();
+		return (EQUIPMENT == window_type && cell >= 0 && cell < EQUIPMENT_MAX);
 	}
 
 	bool IsDragonSoulEquipPosition() const

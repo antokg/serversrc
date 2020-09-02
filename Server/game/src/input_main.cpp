@@ -2007,7 +2007,7 @@ void CInputMain::SafeboxCheckin(LPCHARACTER ch, const char * c_pData)
 	if (!pkSafebox || !pkItem)
 		return;
 
-	if (pkItem->GetCell() >= INVENTORY_MAX_NUM && IS_SET(pkItem->GetFlag(), ITEM_FLAG_IRREMOVABLE))
+	if (pkItem->GetWindow() == EQUIPMENT && IS_SET(pkItem->GetFlag(), ITEM_FLAG_IRREMOVABLE))
 	{
 	    ch->ChatPacket(CHAT_TYPE_INFO, LC_TEXT("<창고> 창고로 옮길 수 없는 아이템 입니다."));
 	    return;
@@ -2921,7 +2921,7 @@ void CInputMain::Refine(LPCHARACTER ch, const char* c_pData)
 		return;
 	}
 
-	if (p->pos >= INVENTORY_MAX_NUM)
+	if (p->pos >= ch->GetExtendInvenMax())
 	{
 		ch->ClearRefineMode();
 		return;
@@ -2974,6 +2974,29 @@ void CInputMain::Refine(LPCHARACTER ch, const char* c_pData)
 
 	ch->ClearRefineMode();
 }
+
+/* EXTEND INVENTORY */
+void CInputMain::ExtendInventory(LPCHARACTER ch, const char* c_pData)
+{
+	TPacketCGExInven* p = (TPacketCGExInven*) c_pData;
+	
+	switch (p->subheader)
+	{
+		case SUBHEADER_EX_INVEN_CLICK:
+			{
+				ch->CheckExtendInventoryCount(EXTEND_INVENTORY_1);
+			}
+			break;
+		case SUBHEADER_EX_INVEN_UPGRADE:
+			{
+				ch->ExtendInventoryAccept();
+			}
+			break;
+		default:
+			sys_err("CInputMain::ExtendInventory unknown subheader %d", p->subheader);
+	}
+}
+/* END EXTEND INVENTORY */
 
 int CInputMain::Analyze(LPDESC d, BYTE bHeader, const char * c_pData)
 {
@@ -3266,6 +3289,15 @@ int CInputMain::Analyze(LPDESC d, BYTE bHeader, const char * c_pData)
 					break;
 				}
 			}
+			
+		/* EXTEND INVENTORY */
+		case HEADER_CG_EX_INVEN:
+			{
+				ExtendInventory(ch, c_pData);
+				break;
+			}
+		
+		/* END EXTEND INVENTORY */
 
 			break;
 	}

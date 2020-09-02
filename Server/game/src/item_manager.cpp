@@ -451,13 +451,13 @@ void ITEM_MANAGER::SaveSingleItem(LPITEM item)
 		return;
 	}
 
-	sys_log(1, "ITEM_SAVE %s:%d in %s window %d", item->GetName(), item->GetID(), item->GetOwner()->GetName(), item->GetWindow());
+	sys_log(1, "ITEM_SAVE %s:%d in %s window %d cell %d", item->GetName(), item->GetID(), item->GetOwner()->GetName(), item->GetWindow(), item->GetCell());
 
 	TPlayerItem t;
 
 	t.id = item->GetID();
 	t.window = item->GetWindow();
-	t.pos = t.window == EQUIPMENT ? item->GetCell() - INVENTORY_MAX_NUM : item->GetCell();
+	t.pos = item->GetCell();
 	t.count = item->GetCount();
 	t.vnum = item->GetOriginalVnum();
 	t.owner = (t.window == SAFEBOX || t.window == MALL) ? item->GetOwner()->GetDesc()->GetAccountTable().id : item->GetOwner()->GetPlayerID();

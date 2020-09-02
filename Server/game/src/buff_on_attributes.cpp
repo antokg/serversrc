@@ -28,9 +28,9 @@ void CBuffOnAttributes::RemoveBuffFromItem(LPITEM pItem)
 		return ;
 	if (NULL != pItem)
 	{
-		if (pItem->GetCell() < INVENTORY_MAX_NUM)
+		if (pItem->GetWindow() != EQUIPMENT)
 			return;
-		std::vector <BYTE>::iterator it = find (m_p_vec_buff_wear_targets->begin(), m_p_vec_buff_wear_targets->end(), pItem->GetCell() - INVENTORY_MAX_NUM);
+		std::vector <BYTE>::iterator it = find (m_p_vec_buff_wear_targets->begin(), m_p_vec_buff_wear_targets->end(), pItem->GetCell());
 		if (m_p_vec_buff_wear_targets->end() == it)
 			return;
 
@@ -64,9 +64,9 @@ void CBuffOnAttributes::AddBuffFromItem(LPITEM pItem)
 		return ;
 	if (NULL != pItem)
 	{
-		if (pItem->GetCell() < INVENTORY_MAX_NUM)
+		if (pItem->GetWindow() != EQUIPMENT)
 			return;
-		std::vector <BYTE>::iterator it = find (m_p_vec_buff_wear_targets->begin(), m_p_vec_buff_wear_targets->end(), pItem->GetCell() - INVENTORY_MAX_NUM);
+		std::vector <BYTE>::iterator it = find (m_p_vec_buff_wear_targets->begin(), m_p_vec_buff_wear_targets->end(), pItem->GetCell());
 		if (m_p_vec_buff_wear_targets->end() == it)
 			return;
 

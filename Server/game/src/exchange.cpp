@@ -299,30 +299,63 @@ bool CExchange::Check(int * piItemCount)
 
 bool CExchange::CheckSpace()
 {
-	static CGrid s_grid1(5, INVENTORY_MAX_NUM/5 / 2); // inven page 1
-	static CGrid s_grid2(5, INVENTORY_MAX_NUM/5 / 2); // inven page 2
+	static CGrid s_grid1(INVENTORY_COL_COUNT, INVENTORY_ROW_COUNT); // inven page 1
+	static CGrid s_grid2(INVENTORY_COL_COUNT, INVENTORY_ROW_COUNT); // inven page 2
+	static CGrid s_grid3(INVENTORY_COL_COUNT, INVENTORY_ROW_COUNT); // inven page 3
+	static CGrid s_grid4(INVENTORY_COL_COUNT, INVENTORY_ROW_COUNT); // inven page 4
 
 	s_grid1.Clear();
 	s_grid2.Clear();
+	s_grid3.Clear();
+	s_grid4.Clear();
 
 	LPCHARACTER	victim = GetCompany()->GetOwner();
 	LPITEM item;
 
-	int i;
+	int i, j;
 
-	for (i = 0; i < INVENTORY_MAX_NUM / 2; ++i)
+	for (i = 0; i < INVENTORY_PAGE_SIZE; ++i)
 	{
 		if (!(item = victim->GetInventoryItem(i)))
 			continue;
 
 		s_grid1.Put(i, 1, item->GetSize());
 	}
-	for (i = INVENTORY_MAX_NUM / 2; i < INVENTORY_MAX_NUM; ++i)
+	
+	for (j = 0, i = INVENTORY_PAGE_SIZE; i < INVENTORY_PAGE_SIZE * 2; ++i, j++)
 	{
 		if (!(item = victim->GetInventoryItem(i)))
 			continue;
 
-		s_grid2.Put(i - INVENTORY_MAX_NUM / 2, 1, item->GetSize());
+		s_grid2.Put(j, 1, item->GetSize());
+	}
+	
+	for (j = 0, i = INVENTORY_PAGE_SIZE * 2; i < INVENTORY_PAGE_SIZE * 3; ++i, j++)
+	{
+		if (i >= victim->GetExtendInvenMax())
+		{
+			s_grid3.Put(j, 1, 1);
+			continue;
+		}
+		
+		if (!(item = victim->GetInventoryItem(i)))
+			continue;
+
+		s_grid3.Put(j, 1, item->GetSize());
+	}
+	
+	for (j = 0, i = INVENTORY_PAGE_SIZE * 3; i < INVENTORY_PAGE_SIZE * 4; ++i, j++)
+	{
+		if (i >= victim->GetExtendInvenMax())
+		{
+			s_grid4.Put(j, 1, 1);
+			continue;
+		}
+		
+		if (!(item = victim->GetInventoryItem(i)))
+			continue;
+
+		s_grid4.Put(j, 1, item->GetSize());
 	}
 
 	// 아... 뭔가 개병신 같지만... 용혼석 인벤을 노멀 인벤 보고 따라 만든 내 잘못이다 ㅠㅠ
@@ -402,7 +435,25 @@ bool CExchange::CheckSpace()
 				}
 				else
 				{
-					return false;
+					iPos = s_grid3.FindBlank(1, item->GetSize());
+					
+					if (iPos >= 0)
+					{
+						s_grid3.Put(iPos, 1, item->GetSize());
+					}
+					else
+					{
+						iPos = s_grid4.FindBlank(1, item->GetSize());
+						
+						if (iPos >= 0)
+						{
+							s_grid4.Put(iPos, 1, item->GetSize());
+						}
+						else
+						{
+							return false;
+						}
+					}
 				}
 			}
 		}

@@ -1293,3 +1293,8 @@ long FN_get_apply_type(const char *apply_type_string)
 	}
 	return 0;
 }
+
+const BYTE extend_inventory_need_count[] = 
+{
+	2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7
+};

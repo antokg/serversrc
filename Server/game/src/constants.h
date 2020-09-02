@@ -186,5 +186,8 @@ long FN_get_apply_type(const char *apply_type_string);
 // END_OF_ACCESSORY_REFINE
 
 long FN_get_apply_type(const char *apply_type_string);
+
+extern const BYTE extend_inventory_need_count[INVENTORY_STAGE_MAX];
+
 #endif
 

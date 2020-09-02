@@ -24,7 +24,7 @@
 
 CItem::CItem(DWORD dwVnum)
 	: m_dwVnum(dwVnum), m_bWindow(0), m_dwID(0), m_bEquipped(false), m_dwVID(0), m_wCell(0), m_dwCount(0), m_lFlag(0), m_dwLastOwnerPID(0),
-	m_bExchanging(false), m_bHighlight(false), m_pkDestroyEvent(NULL), m_pkExpireEvent(NULL), m_pkUniqueExpireEvent(NULL),
+	m_bHighlight(false), m_bExchanging(false), m_pkDestroyEvent(NULL), m_pkExpireEvent(NULL), m_pkUniqueExpireEvent(NULL),
 	m_pkTimerBasedOnWearExpireEvent(NULL), m_pkRealTimeExpireEvent(NULL),
    	m_pkAccessorySocketExpireEvent(NULL), m_pkOwnershipEvent(NULL), m_dwOwnershipPID(0), m_bSkipSave(false), m_isLocked(false),
 	m_dwMaskVnum(0), m_dwSIGVnum (0)
@@ -318,9 +318,9 @@ LPITEM CItem::RemoveFromCharacter()
 			}
 			else
 			{
-				TItemPos cell(INVENTORY, m_wCell);
+				TItemPos cell(m_bWindow, m_wCell);
 
-				if (false == cell.IsDefaultInventoryPosition() && false == cell.IsBeltInventoryPosition()) // 아니면 소지품에?
+				if (!cell.IsDefaultInventoryPosition() && !cell.IsBeltInventoryPosition() && !cell.IsEquipPosition()) // 아니면 소지품에?
 					sys_err("CItem::RemoveFromCharacter: Invalid Item Position");
 				else
 				{
@@ -347,7 +347,7 @@ bool CItem::AddToCharacter(LPCHARACTER ch, TItemPos Cell)
 	
 	if (INVENTORY == window_type)
 	{
-		if (m_wCell >= INVENTORY_MAX_NUM && BELT_INVENTORY_SLOT_START > m_wCell)
+		if (m_wCell >= ch->GetExtendInvenMax())
 		{
 			sys_err("CItem::AddToCharacter: cell overflow: %s to %s cell %d", m_pProto->szName, ch->GetName(), m_wCell);
 			return false;
@@ -687,12 +687,12 @@ void CItem::ModifyPoints(bool bAdd)
 			{
 				if (bAdd)
 				{
-					if (m_wCell == INVENTORY_MAX_NUM + WEAR_WEAPON)
+					if (m_wCell == WEAR_WEAPON)
 						m_pOwner->SetPart(PART_WEAPON, GetVnum());
 				}
 				else
 				{
-					if (m_wCell == INVENTORY_MAX_NUM + WEAR_WEAPON)
+					if (m_wCell == WEAR_WEAPON)
 						m_pOwner->SetPart(PART_WEAPON, m_pOwner->GetOriginalPart(PART_WEAPON));
 				}
 			}
@@ -702,12 +702,12 @@ void CItem::ModifyPoints(bool bAdd)
 			{
 				if (bAdd)
 				{
-					if (m_wCell == INVENTORY_MAX_NUM + WEAR_WEAPON)
+					if (m_wCell == WEAR_WEAPON)
 						m_pOwner->SetPart(PART_WEAPON, GetVnum());
 				}
 				else
 				{
-					if (m_wCell == INVENTORY_MAX_NUM + WEAR_WEAPON)
+					if (m_wCell == WEAR_WEAPON)
 						m_pOwner->SetPart(PART_WEAPON, m_pOwner->GetOriginalPart(PART_WEAPON));
 				}
 			}
@@ -823,22 +823,23 @@ bool CItem::EquipTo(LPCHARACTER ch, BYTE bWearCell)
 	}
 
 	// 용혼석 슬롯 index는 WEAR_MAX_NUM 보다 큼.
-	if (IsDragonSoul())
-	{
-		if (bWearCell < WEAR_MAX_NUM || bWearCell >= WEAR_MAX_NUM + DRAGON_SOUL_DECK_MAX_NUM * DS_SLOT_MAX)
-		{
-			sys_err("EquipTo: invalid dragon soul cell (this: #%d %s wearflag: %d cell: %d)", GetOriginalVnum(), GetName(), GetSubType(), bWearCell - WEAR_MAX_NUM);
-			return false;
-		}
-	}
-	else
-	{
+	// if (IsDragonSoul())
+	// {
+		// TODO recheck this part
+		// if (bWearCell < 0 || bWearCell >= EQUIPMENT_MAX)
+		// {
+			// sys_err("EquipTo: invalid dragon soul cell (this: #%d %s wearflag: %d cell: %d)", GetOriginalVnum(), GetName(), GetSubType(), bWearCell - WEAR_MAX_NUM);
+			// return false;
+		// }
+	// }
+	// else
+	// {
 		if (bWearCell >= WEAR_MAX_NUM)
 		{
 			sys_err("EquipTo: invalid wear cell (this: #%d %s wearflag: %d cell: %d)", GetOriginalVnum(), GetName(), GetWearFlag(), bWearCell);
 			return false;
 		}
-	}
+	// }
 
 	if (ch->GetWear(bWearCell))
 	{
@@ -853,7 +854,7 @@ bool CItem::EquipTo(LPCHARACTER ch, BYTE bWearCell)
 
 	m_pOwner = ch;
 	m_bEquipped = true;
-	m_wCell	= INVENTORY_MAX_NUM + bWearCell;
+	m_wCell	= bWearCell;
 
 	DWORD dwImmuneFlag = 0;
 
@@ -892,7 +893,7 @@ bool CItem::EquipTo(LPCHARACTER ch, BYTE bWearCell)
 
 bool CItem::Unequip()
 {
-	if (!m_pOwner || GetCell() < INVENTORY_MAX_NUM)
+	if (!m_pOwner || GetCell() < 0 || GetCell() >= EQUIPMENT_MAX)
 	{
 		// ITEM_OWNER_INVALID_PTR_BUG
 		sys_err("%s %u m_pOwner %p, GetCell %d", 
@@ -901,7 +902,7 @@ bool CItem::Unequip()
 		return false;
 	}
 
-	if (this != m_pOwner->GetWear(GetCell() - INVENTORY_MAX_NUM))
+	if (this != m_pOwner->GetWear(GetCell()))
 	{
 		sys_err("m_pOwner->GetWear() != this");
 		return false;
@@ -932,7 +933,7 @@ bool CItem::Unequip()
 
 	m_pOwner->BuffOnAttr_RemoveBuffsFromItem(this);
 
-	m_pOwner->SetWear(GetCell() - INVENTORY_MAX_NUM, NULL);
+	m_pOwner->SetWear(GetCell(), NULL);
 
 	DWORD dwImmuneFlag = 0;
 

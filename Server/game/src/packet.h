@@ -94,6 +94,8 @@ enum
 	
 	// HEADER_CG_LOGIN5_OPENID			= 116,	//OpenID : 클라이언트로부터 OpenID 인증키를 받는다.
 	HEADER_CG_OLD_OPENID			= 116,
+	
+	HEADER_CG_EX_INVEN				= 117,
 
 //	HEADER_CG_ROULETTE				= 200,
 
@@ -281,7 +283,9 @@ enum
 
 	// HEADER_GC_AUTH_SUCCESS_OPENID	= 154,
 	HEADER_GC_OLD_OPENID = 154,
-
+	
+	HEADER_GC_EX_INVEN	= 155,
+	
 	// ROULETTE
 	HEADER_GC_ROULETTE					= 200, 
 	// END_ROULETTE			
@@ -2321,5 +2325,34 @@ typedef struct SPacketGCStateCheck
 	unsigned char state;
 } TPacketGCStateCheck;
 
+// Serverside
+enum {
+	EX_INVEN_FAIL_FALL_SHORT,
+	EX_INVEN_SUCCESS,
+	EX_INVEN_FAIL_FOURTH_PAGE_STAGE_MAX,
+};
+
+typedef struct SPacketGCExInven
+{
+	BYTE header;
+	DWORD item_vnum;
+	BYTE msg;
+	BYTE count;
+} TPacketGCExInven;
+
+// Clientside
+
+enum {
+	SUBHEADER_EX_INVEN_CLICK,
+	SUBHEADER_EX_INVEN_UPGRADE,
+};
+
+typedef struct SPacketCGExInven
+{
+	BYTE header;
+	BYTE subheader;
+} TPacketCGExInven;
+
+/* END EXTEND INVENTORY */
 #pragma pack()
 #endif

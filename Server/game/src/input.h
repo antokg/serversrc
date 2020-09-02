@@ -158,6 +158,9 @@ class CInputMain : public CInputProcessor
 		void		Refine(LPCHARACTER ch, const char* c_pData);
 
 		void		Roulette(LPCHARACTER ch, const char* c_pData);
+		/* EXTEND INVENTORY */
+		void		ExtendInventory(LPCHARACTER ch, const char* c_pData);
+		/* END EXTEND INVENTORY */
 };
 
 class CInputDead : public CInputMain

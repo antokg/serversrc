@@ -1396,7 +1396,7 @@ namespace quest
 		LPCHARACTER ch = CQuestManager::instance().GetCurrentCharacterPtr();
 
 		bool bFind = false;
-		for (int iCell = 0; iCell < INVENTORY_MAX_NUM; iCell++)
+		for (int iCell = 0; iCell < ch->GetExtendInvenMax(); iCell++)
 		{
 			LPITEM item = ch->GetInventoryItem(iCell);
 			if (!item)
@@ -1451,7 +1451,7 @@ namespace quest
 		float r = (float)lua_tonumber(L, 3);
 
 		bool bFind = false;
-		for (int iCell = 0; iCell < INVENTORY_MAX_NUM; iCell++)
+		for (int iCell = 0; iCell < ch->GetExtendInvenMax(); iCell++)
 		{
 			LPITEM item = ch->GetInventoryItem(iCell);
 			if (!item)
@@ -2362,7 +2362,7 @@ teleport_area:
 
 		// 용혼석 슬롯은 할 필요 없을 듯.
 		// 이 함수는 탈석서용 함수인 듯 하다.
-		for ( int i=0; i < INVENTORY_MAX_NUM + WEAR_MAX_NUM; i++ )
+		for ( int i=0; i < pChar->GetExtendInvenMax(); i++ )
 		{
 			LPITEM pItem = pChar->GetInventoryItem(i);
 
@@ -2646,7 +2646,7 @@ teleport_area:
 		DWORD group_vnum = (DWORD)lua_tonumber (L, 1);
 		const LPCHARACTER ch = CQuestManager::instance().GetCurrentCharacterPtr();
 		int count = 0;
-		for (int i = 0; i < INVENTORY_MAX_NUM; ++i)
+		for (int i = 0; i < ch->GetExtendInvenMax(); ++i)
 		{
 			if (ch->GetInventoryItem(i) != NULL && ch->GetInventoryItem(i)->GetSIGVnum() == group_vnum)
 			{
@@ -2798,6 +2798,18 @@ teleport_area:
 		lua_pushnumber(L, iRandRange);
 		
 		return 2;
+	}
+	
+	int pc_add_exinven_stage(lua_State* L)
+	{
+		LPCHARACTER ch = CQuestManager::instance().GetCurrentCharacterPtr();
+		if (!ch)
+			return 0;
+		BYTE bCount = (BYTE) lua_tonumber(L, 1);
+		BYTE bStage = MINMAX(0, ch->GetExtendInvenStage() + bCount, INVENTORY_STAGE_MAX);
+		ch->PointChange(POINT_INVENTORY_STAGES, bStage);
+		LogManager::instance().CharLog(ch, bStage, "EXTEND_INVENTORY (QUEST)", "");
+		return 0;
 	}
 
 	void RegisterPCFunctionTable()
@@ -3005,6 +3017,7 @@ teleport_area:
 																	* (이 말이 더 어려울라나 ㅠㅠ)
 																	* 주의사항 : kill event에서만 사용할 것!
 																	*/
+			{ "add_exinven_stage",	pc_add_exinven_stage },
 
 			{ NULL,			NULL			}
 		};

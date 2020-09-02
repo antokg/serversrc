@@ -437,6 +437,8 @@ typedef struct SPlayerTable
 	int		aiPremiumTimes[PREMIUM_MAX_NUM];
 	
 	DWORD	last_play_time;
+	
+	BYTE	inventory_stages;
 } TPlayerTable;
 
 typedef struct SMobSkillLevel

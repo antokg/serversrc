@@ -36,6 +36,8 @@
 #include "unique_item.h"
 #include "DragonSoul.h"
 
+#include <algorithm>
+
 extern bool DropEvent_RefineBox_SetValue(const std::string& name, int value);
 
 // ADD_COMMAND_SLOW_STUN
@@ -875,8 +877,17 @@ ACMD(do_item_purge)
 {
 	int         i;
 	LPITEM      item;
+	
+	for (i = 0; i < EQUIPMENT_MAX; i++)
+	{
+		if ((item = ch->GetItem(TItemPos(EQUIPMENT, i))))
+		{
+			ITEM_MANAGER::instance().RemoveItem(item, "PURGE");
+			ch->SyncQuickslot(QUICKSLOT_TYPE_ITEM, i, 255);
+		}
+	}
 
-	for (i = 0; i < INVENTORY_AND_EQUIP_SLOT_MAX; ++i)
+	for (i = 0; i < INVENTORY_MAX_NUM; ++i)
 	{
 		if ((item = ch->GetInventoryItem(i)))
 		{
@@ -1363,6 +1374,7 @@ const struct set_struct
 	{ "skill",		NUMBER	},
 	{ "alignment",	NUMBER	},
 	{ "align",		NUMBER	},
+	{ "inventory_stages",	NUMBER	},
 	{ "\n",		MISC	}
 };
 
@@ -1459,6 +1471,13 @@ ACMD(do_set)
 				int	amount = 0;
 				str_to_number(amount, arg3);
 				tch->UpdateAlignment(amount - ch->GetRealAlignment());
+			}
+			break;
+		case 9: // inventory stages
+			{
+				int amount = 0;
+				str_to_number(amount, arg3);
+				tch->PointChange(POINT_INVENTORY_STAGES, MINMAX(0, tch->GetExtendInvenStage() + amount, INVENTORY_STAGE_MAX));
 			}
 			break;
 	}
@@ -3988,7 +4007,7 @@ ACMD(do_set_stat)
 
 ACMD(do_get_item_id_list)
 {
-	for (int i = 0; i < INVENTORY_AND_EQUIP_SLOT_MAX; i++)
+	for (int i = 0; i < INVENTORY_MAX_NUM; i++)
 	{
 		LPITEM item = ch->GetInventoryItem(i);
 		if (item != NULL)
@@ -4357,4 +4376,25 @@ ACMD (do_ds_list)
 		if (item != NULL)
 			ch->ChatPacket(CHAT_TYPE_INFO, "cell : %d, name : %s, id : %d", item->GetCell(), item->GetName(), item->GetID());
 	}
+}
+
+ACMD (do_extend_inventory)
+{
+	char arg1[256];
+	one_argument(argument, arg1, sizeof(arg1));
+	
+	BYTE stages;
+	str_to_number(stages, arg1);
+	
+	if (stages < 0 || stages > INVENTORY_STAGE_MAX)
+	{
+		ch->ChatPacket(CHAT_TYPE_INFO, "extend_inventory : value must be between 0 and %d", INVENTORY_STAGE_MAX);
+		return;
+	}
+	
+	BYTE current_stage = ch->GetExtendInvenStage();
+	
+	ch->PointChange(POINT_INVENTORY_STAGES, std::min<BYTE>(current_stage + stages, INVENTORY_STAGE_MAX));
+	
+	return;
 }
