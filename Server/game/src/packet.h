@@ -775,6 +775,7 @@ typedef struct command_exchange
 	BYTE	sub_header;
 	DWORD	arg1;
 	BYTE	arg2;
+	DWORD	arg3;
 	TItemPos	Pos;
 } TPacketCGExchange;
 
@@ -1218,6 +1219,7 @@ struct packet_shop_item
 {   
 	DWORD       vnum;
 	DWORD       price;
+	DWORD		cheque;
 	BYTE        count;
 	BYTE		display_pos;
 	int	alSockets[ITEM_SOCKET_MAX_NUM];

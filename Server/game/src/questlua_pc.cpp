@@ -2811,6 +2811,54 @@ teleport_area:
 		LogManager::instance().CharLog(ch, bStage, "EXTEND_INVENTORY (QUEST)", "");
 		return 0;
 	}
+	
+	/* CHEQUE SYSTEM */
+	int pc_give_cheque(lua_State* L)
+	{
+		LPCHARACTER ch = CQuestManager::instance().GetCurrentCharacterPtr();
+
+		if (!lua_isnumber(L, 1))
+		{
+			sys_err("QUEST : wrong argument");
+			return 0;
+		}
+
+		int iAmount = (int) lua_tonumber(L, 1);
+
+		if (iAmount <= 0)
+		{
+			sys_err("QUEST : cheque amount less then zero");
+			return 0;
+		}
+
+		ch->PointChange(POINT_CHEQUE, iAmount, true);
+		return 0;
+	}
+	
+	int pc_change_cheque(lua_State * L)
+	{
+		int cheque = (int)lua_tonumber(L, -1);
+
+		LPCHARACTER ch = CQuestManager::instance().GetCurrentCharacterPtr();
+
+		if (cheque + ch->GetCheque() < 0)
+		{
+			sys_err("QUEST wrong ChangeCheque %d (now %d)", cheque, ch->GetCheque());
+		}
+		else
+		{
+			ch->PointChange(POINT_CHEQUE, cheque, true);
+		}
+
+		return 0;
+	}
+	
+	int pc_get_cheque(lua_State * L)
+	{ 
+		lua_pushnumber(L, CQuestManager::instance().GetCurrentCharacterPtr()->GetCheque());
+		return 1;
+	}
+	/* END CHEQUE SYSTEM */
 
 	void RegisterPCFunctionTable()
 	{
@@ -3018,6 +3066,9 @@ teleport_area:
 																	* 주의사항 : kill event에서만 사용할 것!
 																	*/
 			{ "add_exinven_stage",	pc_add_exinven_stage },
+			{ "give_cheque",	pc_give_cheque },
+			{ "change_cheque",	pc_change_cheque },
+			{ "get_cheque",	pc_get_cheque },
 
 			{ NULL,			NULL			}
 		};

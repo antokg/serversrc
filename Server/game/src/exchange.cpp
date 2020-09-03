@@ -241,9 +241,9 @@ bool CExchange::RemoveItem(BYTE pos)
 	return true;
 }
 
-bool CExchange::AddGold(long gold)
+bool CExchange::AddGold(long gold, DWORD cheque)
 {
-	if (gold <= 0)
+	if (gold <= 0 && cheque <= 0)
 		return false;
 
 	if (GetOwner()->GetGold() < gold)
@@ -252,22 +252,26 @@ bool CExchange::AddGold(long gold)
 		exchange_packet(GetOwner(), EXCHANGE_SUBHEADER_GC_LESS_GOLD, 0, 0, NPOS, 0);
 		return false;
 	}
-
-	if ( LC_IsCanada() == true || LC_IsEurope() == true )
+	
+	if (GetOwner()->GetCheque() < cheque)
 	{
-		if ( m_lGold > 0 )
-		{
-			return false;
-		}
+		exchange_packet(GetOwner(), EXCHANGE_SUBHEADER_GC_LESS_GOLD, 0, 0, NPOS, 0);
+		return false;
+	}
+
+	if ( m_lGold > 0 || m_dwCheque > 0)
+	{
+		return false;
 	}
 
 	Accept(false);
 	GetCompany()->Accept(false);
 
 	m_lGold = gold;
+	m_dwCheque = cheque;
 
-	exchange_packet(GetOwner(), EXCHANGE_SUBHEADER_GC_GOLD_ADD, true, m_lGold, NPOS, 0);
-	exchange_packet(GetCompany()->GetOwner(), EXCHANGE_SUBHEADER_GC_GOLD_ADD, false, m_lGold, NPOS, 0);
+	exchange_packet(GetOwner(), EXCHANGE_SUBHEADER_GC_GOLD_ADD, true, m_lGold, NPOS, m_dwCheque);
+	exchange_packet(GetCompany()->GetOwner(), EXCHANGE_SUBHEADER_GC_GOLD_ADD, false, m_lGold, NPOS, m_dwCheque);
 	return true;
 }
 
@@ -535,6 +539,20 @@ bool CExchange::Done()
 			LogManager::instance().CharLog(GetOwner(), m_lGold, "EXCHANGE_GOLD_GIVE", exchange_buf);
 		}
 	}
+	
+	/* CHEQUE SYSTEM */
+	if (m_dwCheque)
+	{
+		GetOwner()->PointChange(POINT_CHEQUE, -m_dwCheque, true);
+		victim->PointChange(POINT_CHEQUE, m_dwCheque, true);
+		char exchange_buf[51];
+		snprintf(exchange_buf, sizeof(exchange_buf), "%u %s", GetOwner()->GetPlayerID(), GetOwner()->GetName());
+		LogManager::instance().CharLog(victim, m_dwCheque, "EXCHANGE_CHEQUE_TAKE", exchange_buf);
+		
+		snprintf(exchange_buf, sizeof(exchange_buf), "%u %s", victim->GetPlayerID(), victim->GetName());
+		LogManager::instance().CharLog(GetOwner(), m_dwCheque, "EXCHANGE_CHEQUE_GIVE", exchange_buf);
+	}
+	/* END CHEQUE SYSTEM */
 
 	m_pGrid->Clear();
 	return true;
@@ -603,12 +621,12 @@ bool CExchange::Accept(bool bAccept)
 
 		if (Done())
 		{
-			if (m_lGold) // 돈이 있을 떄만 저장
+			if (m_lGold || m_dwCheque) // 돈이 있을 떄만 저장
 				GetOwner()->Save();
 
 			if (GetCompany()->Done())
 			{
-				if (GetCompany()->m_lGold) // 돈이 있을 때만 저장
+				if (GetCompany()->m_lGold || GetCompany()->m_dwCheque) // 돈이 있을 때만 저장
 					victim->Save();
 
 				// INTERNATIONAL_VERSION

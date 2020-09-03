@@ -286,6 +286,7 @@ enum EPointTypes
 	POINT_RESIST_PENETRATE = 137,		// 관통타격 저항	: 상대의 관통타격 확률을 감소
 	
 	POINT_INVENTORY_STAGES = 138, // temporary 138
+	POINT_CHEQUE	= 139,
 
 	//POINT_MAX_NUM = 129	common/length.h
 };
@@ -365,6 +366,7 @@ typedef struct character_point
 	BYTE			level;
 	DWORD			exp;
 	int			gold;
+	int			cheque;
 
 	int				hp;
 	int				sp;
@@ -1177,6 +1179,11 @@ class CHARACTER : public CEntity, public CFSM, public CHorseRider
 		INT				GetAllowedGold() const;
 		void			GiveGold(INT iAmount);	// 파티가 있으면 파티 분배, 로그 등의 처리
 		// End of Money
+		
+		/* CHEQUE SYSTEM */
+		int				GetCheque() const { return m_points.cheque; }
+		void			SetCheque(int cheque) { m_points.cheque = cheque; }
+		/* END CHEQUE SYSTEM */
 
 		////////////////////////////////////////////////////////////////////////////////////////
 		// Shop related

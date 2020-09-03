@@ -161,6 +161,7 @@ void CShop::SetShopItems(TShopItemTable * pTable, BYTE bItemCount)
 			item.vnum = pkItem->GetVnum();
 			item.count = pkItem->GetCount(); // PC 샵의 경우 아이템 개수는 진짜 아이템의 개수여야 한다.
 			item.price = pTable->price; // 가격도 사용자가 정한대로..
+			item.cheque = pTable->cheque;
 			item.itemid	= pkItem->GetID();
 		}
 		else
@@ -204,12 +205,6 @@ int CShop::Buy(LPCHARACTER ch, BYTE pos)
 
 	SHOP_ITEM& r_item = m_itemVector[pos];
 
-	if (r_item.price <= 0)
-	{
-		LogManager::instance().HackLog("SHOP_BUY_GOLD_OVERFLOW", ch);
-		return SHOP_SUBHEADER_GC_NOT_ENOUGH_MONEY;
-	}
-
 	LPITEM pkSelectedItem = ITEM_MANAGER::instance().Find(r_item.itemid);
 
 	if (IsPCShop())
@@ -241,6 +236,14 @@ int CShop::Buy(LPCHARACTER ch, BYTE pos)
 	if (ch->GetGold() < (int) dwPrice)
 	{
 		sys_log(1, "Shop::Buy : Not enough money : %s has %d, price %d", ch->GetName(), ch->GetGold(), dwPrice);
+		return SHOP_SUBHEADER_GC_NOT_ENOUGH_MONEY;
+	}
+	
+	DWORD dwCheque = r_item.cheque;
+	
+	if (ch->GetCheque() < (int) dwCheque)
+	{
+		sys_log(1, "Shop::Buy : Not enough cheque : %s has %d, price %d", ch->GetName(), ch->GetCheque(), dwCheque);
 		return SHOP_SUBHEADER_GC_NOT_ENOUGH_MONEY;
 	}
 
@@ -292,46 +295,27 @@ int CShop::Buy(LPCHARACTER ch, BYTE pos)
 	}
 
 	ch->PointChange(POINT_GOLD, -dwPrice, false);
+	ch->PointChange(POINT_CHEQUE, -dwCheque, false);
 	item->Highlight(true);
 
 	//세금 계산
 	DWORD dwTax = 0;
 	int iVal = 0;
 
-	if (LC_IsYMIR() ||  LC_IsKorea())
+	iVal = quest::CQuestManager::instance().GetEventFlag("personal_shop");
+	
+	if (0 < iVal)
 	{
-		if (0 < (iVal = quest::CQuestManager::instance().GetEventFlag("trade_tax")))
-		{
-			if (iVal > 100)
-				iVal = 100;
-
-			dwTax = dwPrice * iVal / 100;
-			dwPrice = dwPrice - dwTax;
-		}
-		else
-		{
-			iVal = 3;
-			dwTax = dwPrice * iVal / 100;
-			dwPrice = dwPrice - dwTax;			
-		}
+		if (iVal > 100)
+			iVal = 100;
+	
+		dwTax = dwPrice * iVal / 100;
+		dwPrice = dwPrice - dwTax;
 	}
 	else
 	{
-		iVal = quest::CQuestManager::instance().GetEventFlag("personal_shop");
-
-		if (0 < iVal)
-		{
-			if (iVal > 100)
-				iVal = 100;
-
-			dwTax = dwPrice * iVal / 100;
-			dwPrice = dwPrice - dwTax;
-		}
-		else
-		{
-			iVal = 0;
-			dwTax = 0;
-		}
+		iVal = 0;
+		dwTax = 0;
 	}
 
 	// 상점에서 살떄 세금 5%
@@ -372,6 +356,7 @@ int CShop::Buy(LPCHARACTER ch, BYTE pos)
 	BroadcastUpdateItem(pos);
 
 		m_pkPC->PointChange(POINT_GOLD, dwPrice, false);
+		m_pkPC->PointChange(POINT_CHEQUE, dwCheque, false);
 
 		if (iVal > 0)
 			m_pkPC->ChatPacket(CHAT_TYPE_INFO, LC_TEXT("판매금액의 %d %% 가 세금으로 나가게됩니다"), iVal);
@@ -451,6 +436,8 @@ bool CShop::AddGuest(LPCHARACTER ch, DWORD owner_vid, bool bOtherEmpire)
 			pack2.items[i].price = item.price * 3;
 		else
 			pack2.items[i].price = item.price;
+		
+		pack2.items[i].cheque = item.cheque;
 
 		pack2.items[i].count = item.count;
 
@@ -535,6 +522,7 @@ void CShop::BroadcastUpdateItem(BYTE pos)
 	}
 
 	pack2.item.price	= m_itemVector[pos].price;
+	pack2.item.cheque	= m_itemVector[pos].cheque;
 	pack2.item.count	= m_itemVector[pos].count;
 
 	buf.write(&pack, sizeof(pack));

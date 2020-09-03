@@ -100,6 +100,7 @@ size_t CreatePlayerSaveQuery(char * pszQuery, size_t querySize, TPlayerTable * p
 			"dx = %d, "
 			"iq = %d, "
 			"gold = %d, "
+			"cheque = %d, "
 			"exp = %u, "
 			"stat_point = %d, "
 			"skill_point = %d, "
@@ -143,6 +144,7 @@ size_t CreatePlayerSaveQuery(char * pszQuery, size_t querySize, TPlayerTable * p
 		pkTab->dx,
 		pkTab->iq,
 		pkTab->gold,
+		pkTab->cheque,
 		pkTab->exp,
 		pkTab->stat_point,
 		pkTab->skill_point,
@@ -365,7 +367,7 @@ void CClientManager::QUERY_PLAYER_LOAD(CPeer * peer, DWORD dwHandle, TPlayerLoad
 		snprintf(queryStr, sizeof(queryStr),
 				"SELECT "
 				"id,name,job,voice,dir,x,y,z,map_index,exit_x,exit_y,exit_map_index,hp,mp,stamina,random_hp,random_sp,playtime,"
-				"gold,level,level_step,st,ht,dx,iq,exp,"
+				"gold,cheque,level,level_step,st,ht,dx,iq,exp,"
 				"stat_point,skill_point,sub_skill_point,stat_reset_count,part_base,part_hair,"
 				"skill_level,quickslot,skill_group,alignment,mobile,horse_level,horse_riding,horse_hp,horse_hp_droptime,horse_stamina,"
 				"UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(last_play),horse_skill_point, inventory_stages FROM player%s WHERE id=%d",
@@ -476,6 +478,7 @@ bool CreatePlayerTableFromRes(MYSQL_RES * res, TPlayerTable * pkTab)
 	str_to_number(pkTab->sRandomSP, row[col++]);
 	str_to_number(pkTab->playtime, row[col++]);
 	str_to_number(pkTab->gold, row[col++]);
+	str_to_number(pkTab->cheque, row[col++]);
 	str_to_number(pkTab->level, row[col++]);
 	str_to_number(pkTab->level_step, row[col++]);
 	str_to_number(pkTab->st, row[col++]);

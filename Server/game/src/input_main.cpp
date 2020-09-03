@@ -1207,6 +1207,7 @@ void CInputMain::Exchange(LPCHARACTER ch, const char * data)
 			if (ch->GetExchange())
 			{
 				const int64_t nTotalGold = static_cast<int64_t>(ch->GetExchange()->GetCompany()->GetOwner()->GetGold()) + static_cast<int64_t>(pinfo->arg1);
+				const int totalCheque = ch->GetExchange()->GetCompany()->GetOwner()->GetCheque() + pinfo->arg3;
 
 				if (GOLD_MAX <= nTotalGold)
 				{
@@ -1219,9 +1220,17 @@ void CInputMain::Exchange(LPCHARACTER ch, const char * data)
 
 					return;
 				}
+				
+				if (CHEQUE_MAX <= totalCheque)
+				{
+					ch->ChatPacket(CHAT_TYPE_INFO, LC_TEXT("상대방의 총금액이 20억 냥을 초과하여 거래를 할수가 없습니다.."));
+					return;
+				}
 
 				if (ch->GetExchange()->GetCompany()->GetAcceptStatus() != true)
-					ch->GetExchange()->AddGold(pinfo->arg1);
+				{
+					ch->GetExchange()->AddGold(pinfo->arg1, pinfo->arg3);
+				}
 			}
 			break;
 

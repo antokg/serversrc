@@ -16,6 +16,7 @@ class CShop
 		{
 			DWORD	vnum;		// 아이템 번호
 			long	price;		// 가격
+			int		cheque;
 			BYTE	count;		// 아이템 개수
 
 			LPITEM	pkItem;

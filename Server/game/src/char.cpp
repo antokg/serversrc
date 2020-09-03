@@ -1138,6 +1138,7 @@ void CHARACTER::CreatePlayerProto(TPlayerTable & tab)
 	tab.level_step	= GetPoint(POINT_LEVEL_STEP);
 	tab.exp			= GetExp();
 	tab.gold		= GetGold();
+	tab.cheque		= GetCheque();
 	tab.job			= m_points.job;
 	tab.part_base	= m_pointsInstant.bBasePart;
 	tab.skill_group	= m_points.skill_group;
@@ -1574,6 +1575,7 @@ void CHARACTER::PointsPacket()
 		pack.points[i] = GetPoint(i);
 	
 	pack.points[POINT_INVENTORY_STAGES] = GetExtendInvenStage();
+	pack.points[POINT_CHEQUE] = GetCheque();
 
 	GetDesc()->Packet(&pack, sizeof(TPacketGCPoints));
 }
@@ -1745,6 +1747,7 @@ void CHARACTER::SetPlayerProto(const TPlayerTable * t)
 	SetLevel(t->level);
 	SetExp(t->exp);
 	SetGold(t->gold);
+	SetCheque(t->cheque);
 
 	SetMapIndex(t->lMapIndex);
 	SetXYZ(t->x, t->y, t->z);
@@ -3574,6 +3577,22 @@ void CHARACTER::PointChange(BYTE type, int amount, bool bAmount, bool bBroadcast
 			{
 				SetExtendInvenStage(amount);
 				val = GetExtendInvenStage();
+			}
+			break;
+			
+		case POINT_CHEQUE:
+			{
+				const int totalCheque = GetCheque() + amount;
+
+				if (CHEQUE_MAX <= totalCheque)
+				{
+					sys_err("[OVERFLOW_GOLD] OriCheque %d AddedCheque %d id %u Name %s ", GetCheque(), amount, GetPlayerID(), GetName());
+					LogManager::instance().CharLog(this, GetCheque() + amount, "OVERFLOW_CHEQUE", "");
+					return;
+				}
+
+				SetCheque(GetCheque() + amount);
+				val = GetCheque();
 			}
 			break;
 

@@ -1375,6 +1375,7 @@ const struct set_struct
 	{ "alignment",	NUMBER	},
 	{ "align",		NUMBER	},
 	{ "inventory_stages",	NUMBER	},
+	{ "cheque",		NUMBER },
 	{ "\n",		MISC	}
 };
 
@@ -1478,6 +1479,13 @@ ACMD(do_set)
 				int amount = 0;
 				str_to_number(amount, arg3);
 				tch->PointChange(POINT_INVENTORY_STAGES, MINMAX(0, tch->GetExtendInvenStage() + amount, INVENTORY_STAGE_MAX));
+			}
+			break;
+		case 10: // cheque
+			{
+				int cheque = 0;
+				str_to_number(cheque, arg3);
+				tch->PointChange(POINT_CHEQUE, cheque, true);
 			}
 			break;
 	}
