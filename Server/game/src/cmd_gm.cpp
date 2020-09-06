@@ -1376,6 +1376,8 @@ const struct set_struct
 	{ "align",		NUMBER	},
 	{ "inventory_stages",	NUMBER	},
 	{ "cheque",		NUMBER },
+	{ "gem",		NUMBER, },
+	{ "gaya",		NUMBER, },
 	{ "\n",		MISC	}
 };
 
@@ -1486,6 +1488,14 @@ ACMD(do_set)
 				int cheque = 0;
 				str_to_number(cheque, arg3);
 				tch->PointChange(POINT_CHEQUE, cheque, true);
+			}
+			break;
+		case 11: // gem
+		case 12: // gem
+			{
+				int gem = 0;
+				str_to_number(gem, arg3);
+				tch->PointChange(POINT_GEM, gem, true);
 			}
 			break;
 	}

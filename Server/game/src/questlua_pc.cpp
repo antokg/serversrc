@@ -2859,6 +2859,54 @@ teleport_area:
 		return 1;
 	}
 	/* END CHEQUE SYSTEM */
+	
+	/* GEM SYSTEM */
+	int pc_give_gem(lua_State* L)
+	{
+		LPCHARACTER ch = CQuestManager::instance().GetCurrentCharacterPtr();
+
+		if (!lua_isnumber(L, 1))
+		{
+			sys_err("QUEST : wrong argument");
+			return 0;
+		}
+
+		int iAmount = (int) lua_tonumber(L, 1);
+
+		if (iAmount <= 0)
+		{
+			sys_err("QUEST : cheque amount less then zero");
+			return 0;
+		}
+
+		ch->PointChange(POINT_GEM, iAmount, true);
+		return 0;
+	}
+	
+	int pc_change_gem(lua_State * L)
+	{
+		int gem = (int)lua_tonumber(L, -1);
+
+		LPCHARACTER ch = CQuestManager::instance().GetCurrentCharacterPtr();
+
+		if (gem + ch->GetGem() < 0)
+		{
+			sys_err("QUEST wrong ChangeCheque %d (now %d)", gem, ch->GetGem());
+		}
+		else
+		{
+			ch->PointChange(POINT_GEM, gem, true);
+		}
+
+		return 0;
+	}
+	
+	int pc_get_gem(lua_State * L)
+	{ 
+		lua_pushnumber(L, CQuestManager::instance().GetCurrentCharacterPtr()->GetGem());
+		return 1;
+	}
+	/* END GEM SYSTEM */
 
 	void RegisterPCFunctionTable()
 	{
@@ -3069,6 +3117,13 @@ teleport_area:
 			{ "give_cheque",	pc_give_cheque },
 			{ "change_cheque",	pc_change_cheque },
 			{ "get_cheque",	pc_get_cheque },
+			
+			{ "give_gem",	pc_give_gem },
+			{ "change_gem",	pc_change_gem },
+			{ "get_gem",	pc_get_gem },
+			{ "give_gaya",	pc_give_gem },
+			{ "change_gaya",	pc_change_gem },
+			{ "get_gaya",	pc_get_gem },
 
 			{ NULL,			NULL			}
 		};

@@ -287,6 +287,7 @@ enum EPointTypes
 	
 	POINT_INVENTORY_STAGES = 138, // temporary 138
 	POINT_CHEQUE	= 139,
+	POINT_GEM		= 140,
 
 	//POINT_MAX_NUM = 129	common/length.h
 };
@@ -367,6 +368,7 @@ typedef struct character_point
 	DWORD			exp;
 	int			gold;
 	int			cheque;
+	int			gem;
 
 	int				hp;
 	int				sp;
@@ -1184,6 +1186,11 @@ class CHARACTER : public CEntity, public CFSM, public CHorseRider
 		int				GetCheque() const { return m_points.cheque; }
 		void			SetCheque(int cheque) { m_points.cheque = cheque; }
 		/* END CHEQUE SYSTEM */
+		
+		/* GEM SYSTEM */
+		int				GetGem() const { return m_points.gem; }
+		void			SetGem(int gem) { m_points.gem = gem; }
+		/* END GEM SYSTEM */
 
 		////////////////////////////////////////////////////////////////////////////////////////
 		// Shop related

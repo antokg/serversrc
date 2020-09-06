@@ -1139,6 +1139,7 @@ void CHARACTER::CreatePlayerProto(TPlayerTable & tab)
 	tab.exp			= GetExp();
 	tab.gold		= GetGold();
 	tab.cheque		= GetCheque();
+	tab.gem			= GetGem();
 	tab.job			= m_points.job;
 	tab.part_base	= m_pointsInstant.bBasePart;
 	tab.skill_group	= m_points.skill_group;
@@ -1576,6 +1577,7 @@ void CHARACTER::PointsPacket()
 	
 	pack.points[POINT_INVENTORY_STAGES] = GetExtendInvenStage();
 	pack.points[POINT_CHEQUE] = GetCheque();
+	pack.points[POINT_GEM] = GetGem();
 
 	GetDesc()->Packet(&pack, sizeof(TPacketGCPoints));
 }
@@ -1748,6 +1750,7 @@ void CHARACTER::SetPlayerProto(const TPlayerTable * t)
 	SetExp(t->exp);
 	SetGold(t->gold);
 	SetCheque(t->cheque);
+	SetGem(t->gem);
 
 	SetMapIndex(t->lMapIndex);
 	SetXYZ(t->x, t->y, t->z);
@@ -3593,6 +3596,21 @@ void CHARACTER::PointChange(BYTE type, int amount, bool bAmount, bool bBroadcast
 
 				SetCheque(GetCheque() + amount);
 				val = GetCheque();
+			}
+			break;
+		case POINT_GEM:
+			{
+				const int total = GetGem() + amount;
+
+				if (GEM_MAX <= total)
+				{
+					sys_err("[OVERFLOW_GOLD] OriGem %d AddedGem %d id %u Name %s ", GetGem(), amount, GetPlayerID(), GetName());
+					LogManager::instance().CharLog(this, GetGem() + amount, "OVERFLOW_GEM", "");
+					return;
+				}
+
+				SetGem(GetGem() + amount);
+				val = GetGem();
 			}
 			break;
 

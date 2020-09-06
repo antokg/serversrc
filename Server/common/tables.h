@@ -394,9 +394,14 @@ typedef struct SPlayerTable
 
 	DWORD	exp;
 	INT		gold;
+	
 	/* CHEQUE SYSTEM */
 	DWORD	cheque;
 	/* END CHEQUE SYSTEM */
+	
+	/* GEM SYSTEM */
+	DWORD	gem;
+	/* END GEM SYSTEM */
 
 	BYTE	dir;
 	INT		x, y, z;
