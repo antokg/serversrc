@@ -43,9 +43,9 @@ DWORD arena_return_position[4][2] =
 DWORD g_create_position[4][2] = 
 {
 	{		0,		0 },
-	{ 459800, 953900 },
-	{ 52070, 166600 },
-	{ 957300, 255200 },	
+	{ 475100, 966000 },
+	{ 60000, 156000 },
+	{ 963600, 278300 },	
 };
 
 DWORD g_create_position_canada[4][2] = 
