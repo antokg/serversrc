@@ -359,7 +359,13 @@ LPCHARACTER CHARACTER_MANAGER::SpawnMob(DWORD dwVnum, long lMapIndex, long x, lo
 		return NULL;
 	}
 
-	if (!(pkMob->m_table.bType == CHAR_TYPE_NPC || pkMob->m_table.bType == CHAR_TYPE_WARP || pkMob->m_table.bType == CHAR_TYPE_GOTO) || mining::IsVeinOfOre (dwVnum))
+	if (!(pkMob->m_table.bType == CHAR_TYPE_NPC || 
+			pkMob->m_table.bType == CHAR_TYPE_WARP || 
+			pkMob->m_table.bType == CHAR_TYPE_GOTO || 
+			pkMob->m_table.bType == CHAR_TYPE_HORSE || 
+			pkMob->m_table.bType == CHAR_TYPE_PET || 
+			pkMob->m_table.bType == CHAR_TYPE_PET_PAY
+		) || mining::IsVeinOfOre (dwVnum))
 	{
 		LPSECTREE tree = SECTREE_MANAGER::instance().Get(lMapIndex, x, y);
 
