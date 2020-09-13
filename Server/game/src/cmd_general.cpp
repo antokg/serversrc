@@ -2017,7 +2017,7 @@ static const char* FN_point_string(int apply_number)
 		case POINT_RESIST_ASSASSIN:	return LC_TEXT("자객공격에 %d%% 저항");
 		case POINT_RESIST_SURA:		return LC_TEXT("수라공격에 %d%% 저항");
 		case POINT_RESIST_SHAMAN:	return LC_TEXT("무당공격에 %d%% 저항");
-		default:					return NULL;
+		default:					return "UNKNOWN_APPLY";
 	}
 }
 

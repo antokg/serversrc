@@ -521,7 +521,7 @@ struct command_info cmd_info[] =
 	{ "item_id_list",	do_get_item_id_list,	0,	POS_DEAD,	GM_LOW_WIZARD	},
 	{ "set_socket",		do_set_socket,			0,	POS_DEAD,	GM_LOW_WIZARD	},
 
-	{ "costume",			do_costume, 			0,	POS_DEAD,	GM_PLAYER	},
+	{ "costume",			do_costume, 			0,	POS_DEAD,	GM_LOW_WIZARD	},
 
 	{ "tcon",			do_set_stat,	POINT_HT,	POS_DEAD,	GM_LOW_WIZARD	},
 	{ "tint",			do_set_stat,	POINT_IQ,	POS_DEAD,	GM_LOW_WIZARD	},
