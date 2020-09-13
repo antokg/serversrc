@@ -5524,6 +5524,12 @@ bool CHARACTER::MoveItem(TItemPos Cell, TItemPos DestCell, BYTE count)
 			ChatPacket(CHAT_TYPE_INFO, LC_TEXT("강화창을 연 상태에서는 아이템을 옮길 수 없습니다."));
 		return false;
 	}
+	
+	if (item->IsEquipped() && item->GetType() == ITEM_WEAPON && item->GetSubType() != WEAPON_ARROW && GetWear(WEAR_COSTUME_WEAPON))
+	{
+		ChatPacket(CHAT_TYPE_INFO, LC_TEXT("COSTUME_WEAPON_REMOVE_BEFORE_UNEQUIP"));
+		return false;
+	}
 
 	// 기획자의 요청으로 벨트 인벤토리에는 특정 타입의 아이템만 넣을 수 있다.
 	// if (DestCell.IsBeltInventoryPosition() && false == CBeltInventoryHelper::CanMoveIntoBeltInventory(item))
@@ -6021,6 +6027,15 @@ bool CHARACTER::UnequipItem(LPITEM item)
 
 	if (false == CanUnequipNow(item))
 		return false;
+	
+	if (item->GetType() == ITEM_WEAPON && item->GetSubType() != WEAPON_ARROW)
+	{
+		if (GetWear(WEAR_COSTUME_WEAPON))
+		{
+			ChatPacket(CHAT_TYPE_INFO, LC_TEXT("COSTUME_WEAPON_REMOVE_BEFORE_UNEQUIP"));
+			return false;
+		}
+	}
 
 	if (item->IsDragonSoul())
 		pos = GetEmptyDragonSoulInventory(item);
@@ -6087,6 +6102,45 @@ bool CHARACTER::EquipItem(LPITEM item, int iCandidateCell)
 	{
 		ChatPacket(CHAT_TYPE_INFO, LC_TEXT("이미 탈것을 이용중입니다."));
 		return false;
+	}
+	
+	if (item->GetType() == ITEM_COSTUME && item->GetSubType() == COSTUME_WEAPON)
+	{
+		LPITEM weapon = GetWear(WEAR_WEAPON);
+		if (weapon)
+		{
+			if ((weapon->GetSubType() != item->GetValue(3) &&  weapon->GetSubType() != WEAPON_ARROW) || weapon->GetType() == ITEM_ROD || weapon->GetType() == ITEM_PICK)
+			{
+				ChatPacket(CHAT_TYPE_INFO, LC_TEXT("COSTUME_WEAPON_MUST_BE_SAME_TYPE"));
+				return false;
+			}
+		}
+		else
+		{
+			ChatPacket(CHAT_TYPE_INFO, LC_TEXT("COSTUME_WEAPON_MUST_WEAR_WEAPON"));
+			return false;
+		}
+	}
+	else if (item->GetType() == ITEM_WEAPON)
+	{
+		LPITEM costume = GetWear(WEAR_COSTUME_WEAPON);
+		if (costume)
+		{
+			if (item->GetSubType() != costume->GetValue(3) && item->GetSubType() != WEAPON_ARROW)
+			{
+				ChatPacket(CHAT_TYPE_INFO, LC_TEXT("COSTUME_WEAPON_MUST_BE_SAME_TYPE"));
+				return false;
+			}
+		}
+	}
+	else if (item->GetType() == ITEM_ROD || item->GetType() == ITEM_PICK)
+	{
+		LPITEM costume = GetWear(WEAR_COSTUME_WEAPON);
+		if (costume)
+		{
+			ChatPacket(CHAT_TYPE_INFO, LC_TEXT("COSTUME_WEAPON_NOT_WEAPON"));
+			return false;
+		}
 	}
 
 	// 화살 이외에는 마지막 공격 시간 또는 스킬 사용 1.5 후에 장비 교체가 가능
@@ -6275,7 +6329,7 @@ void CHARACTER::BuffOnAttr_ValueChange(BYTE bType, BYTE bOldValue, BYTE bNewValu
 				break;
 			case POINT_COSTUME_ATTR_BONUS:
 				{
-					static BYTE abSlot[] = { WEAR_COSTUME_BODY, WEAR_COSTUME_HAIR };
+					static BYTE abSlot[] = { WEAR_COSTUME_BODY, WEAR_COSTUME_HAIR, WEAR_COSTUME_WEAPON };
 					static std::vector <BYTE> vec_slots (abSlot, abSlot + _countof(abSlot));
 					pBuff = M2_NEW CBuffOnAttributes(this, bType, &vec_slots);
 				}

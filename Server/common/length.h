@@ -110,6 +110,7 @@ enum EWearPositions
     WEAR_ABILITY8,  // 18
 	WEAR_COSTUME_BODY,	// 19
 	WEAR_COSTUME_HAIR,	// 20
+	WEAR_COSTUME_WEAPON = 24, // 24
 	
 	WEAR_RING1,			// 21	: 신규 반지슬롯1 (왼쪽)
 	WEAR_RING2,			// 22	: 신규 반지슬롯2 (오른쪽)

@@ -11,3 +11,5 @@ libsql.a
 libthecore.a
 OBJDIR
 .obj
+limit_time.h
+

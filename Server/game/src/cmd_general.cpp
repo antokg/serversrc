@@ -2069,6 +2069,7 @@ ACMD(do_costume)
 
 	CItem* pBody = ch->GetWear(WEAR_COSTUME_BODY);
 	CItem* pHair = ch->GetWear(WEAR_COSTUME_HAIR);
+	CItem* pWeapon = ch->GetWear(WEAR_COSTUME_WEAPON);
 
 	ch->ChatPacket(CHAT_TYPE_INFO, "COSTUME status:");
 
@@ -2098,6 +2099,15 @@ ACMD(do_costume)
 
 		if (pBody->IsEquipped() && arg1[0] == 'b')
 			ch->UnequipItem(pBody);
+	}
+	
+	if (pWeapon)
+	{
+		const char* itemName = pWeapon->GetName();
+		ch->ChatPacket(CHAT_TYPE_INFO, "  WEAPON : %s", itemName);
+
+		if (pWeapon->IsEquipped() && arg1[0] == 'b')
+			ch->UnequipItem(pWeapon);
 	}
 }
 

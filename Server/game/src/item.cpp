@@ -506,6 +506,8 @@ int CItem::FindEquipCell(LPCHARACTER ch, int iCandidateCell)
 			return WEAR_COSTUME_BODY;
 		else if (GetSubType() == COSTUME_HAIR)
 			return WEAR_COSTUME_HAIR;
+		else if (GetSubType() == COSTUME_WEAPON)
+			return WEAR_COSTUME_WEAPON;
 	}
 	else if (GetType() == ITEM_RING)
 	{
@@ -700,6 +702,9 @@ void CItem::ModifyPoints(bool bAdd)
 
 		case ITEM_WEAPON:
 			{
+				if (m_pOwner->GetWear(WEAR_COSTUME_WEAPON) != 0)
+					break;
+				
 				if (bAdd)
 				{
 					if (m_wCell == WEAR_WEAPON)
@@ -763,6 +768,19 @@ void CItem::ModifyPoints(bool bAdd)
 					// 코스츔 헤어는 shape값을 item proto의 value3에 세팅하도록 함. 특별한 이유는 없고 기존 갑옷(ARMOR_BODY)의 shape값이 프로토의 value3에 있어서 헤어도 같이 value3으로 함.
 					// [NOTE] 갑옷은 아이템 vnum을 보내고 헤어는 shape(value3)값을 보내는 이유는.. 기존 시스템이 그렇게 되어있음...
 					toSetValue = (true == bAdd) ? this->GetValue(3) : 0;
+				}
+				else if (GetSubType() == COSTUME_WEAPON)
+				{
+					toSetPart = PART_WEAPON;
+					if (!bAdd)
+					{
+						const CItem* pWeapon = m_pOwner->GetWear(WEAR_WEAPON);
+						toSetValue = (NULL != pWeapon) ? pWeapon->GetVnum() : m_pOwner->GetPart(PART_WEAPON);
+					}
+					else
+					{
+						toSetValue = GetVnum();
+					}
 				}
 
 				if (PART_MAX_NUM != toSetPart)

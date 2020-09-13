@@ -11,9 +11,14 @@ const int MAX_RARE_ATTR_NUM = ITEM_MANAGER::MAX_RARE_ATTR_NUM;
 
 int CItem::GetAttributeSetIndex()
 {
-	if (GetType() == ITEM_WEAPON)
+	if (GetType() == ITEM_WEAPON || (GetType() == ITEM_COSTUME && GetSubType() == COSTUME_WEAPON))
 	{
-		if (GetSubType() == WEAPON_ARROW)
+		BYTE bSubType = GetSubType();
+		
+		if (GetType() == ITEM_COSTUME)
+			bSubType = GetValue(3);
+		
+		if (bSubType == WEAPON_ARROW)
 			return -1;
 
 		return ATTRIBUTE_SET_WEAPON;
