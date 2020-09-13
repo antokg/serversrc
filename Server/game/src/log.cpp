@@ -50,7 +50,7 @@ void LogManager::ItemLog(DWORD dwPID, DWORD x, DWORD y, DWORD dwItemID, const ch
 {
 	m_sql.EscapeString(__escape_hint, sizeof(__escape_hint), c_pszHint, strlen(c_pszHint));
 
-	Query("INSERT DELAYED INTO log%s (type, time, who, x, y, what, how, hint, ip, vnum) VALUES('ITEM', NOW(), %u, %u, %u, %u, '%s', '%s', '%s', %u)",
+	Query("INSERT INTO log%s (type, time, who, x, y, what, how, hint, ip, vnum) VALUES('ITEM', NOW(), %u, %u, %u, %u, '%s', '%s', '%s', %u)",
 			get_table_postfix(), dwPID, x, y, dwItemID, c_pszText, __escape_hint, c_pszIP, dwVnum);
 }
 
@@ -77,7 +77,7 @@ void LogManager::CharLog(DWORD dwPID, DWORD x, DWORD y, DWORD dwValue, const cha
 {
 	m_sql.EscapeString(__escape_hint, sizeof(__escape_hint), c_pszHint, strlen(c_pszHint));
 
-	Query("INSERT DELAYED INTO log%s (type, time, who, x, y, what, how, hint, ip) VALUES('CHARACTER', NOW(), %u, %u, %u, %u, '%s', '%s', '%s')",
+	Query("INSERT INTO log%s (type, time, who, x, y, what, how, hint, ip) VALUES('CHARACTER', NOW(), %u, %u, %u, %u, '%s', '%s', '%s')",
 			get_table_postfix(), dwPID, x, y, dwValue, c_pszText, __escape_hint, c_pszIP);
 }
 
@@ -91,7 +91,7 @@ void LogManager::CharLog(LPCHARACTER ch, DWORD dw, const char * c_pszText, const
 
 void LogManager::LoginLog(bool isLogin, DWORD dwAccountID, DWORD dwPID, BYTE bLevel, BYTE bJob, DWORD dwPlayTime)
 {
-	Query("INSERT DELAYED INTO loginlog%s (type, time, channel, account_id, pid, level, job, playtime) VALUES (%s, NOW(), %d, %u, %u, %d, %d, %u)",
+	Query("INSERT INTO loginlog%s (type, time, channel, account_id, pid, level, job, playtime) VALUES (%s, NOW(), %d, %u, %u, %d, %d, %u)",
 			get_table_postfix(), isLogin ? "'LOGIN'" : "'LOGOUT'", g_bChannel, dwAccountID, dwPID, bLevel, bJob, dwPlayTime);
 }
 
@@ -103,7 +103,7 @@ void LogManager::MoneyLog(BYTE type, DWORD vnum, int gold)
 		return;
 	}
 
-	Query("INSERT DELAYED INTO money_log%s VALUES (NOW(), %d, %d, %d)", get_table_postfix(), type, vnum, gold);
+	Query("INSERT INTO money_log%s VALUES (NOW(), %d, %d, %d)", get_table_postfix(), type, vnum, gold);
 }
 
 void LogManager::HackLog(const char * c_pszHackName, const char * c_pszLogin, const char * c_pszName, const char * c_pszIP)
@@ -168,13 +168,13 @@ void LogManager::GoldBarLog(DWORD dwPID, DWORD dwItemID, GOLDBAR_HOW eHow, const
 			break;
 	}
 	
-	Query("INSERT DELAYED INTO goldlog%s (date, time, pid, what, how, hint) VALUES(CURDATE(), CURTIME(), %u, %u, %s, '%s')", 
+	Query("INSERT INTO goldlog%s (date, time, pid, what, how, hint) VALUES(CURDATE(), CURTIME(), %u, %u, %s, '%s')", 
 			get_table_postfix(), dwPID, dwItemID, szHow, c_pszHint);
 }
 
 void LogManager::CubeLog(DWORD dwPID, DWORD x, DWORD y, DWORD item_vnum, DWORD item_uid, int item_count, bool success)
 {
-	Query("INSERT DELAYED INTO cube%s (pid, time, x, y, item_vnum, item_uid, item_count, success) "
+	Query("INSERT INTO cube%s (pid, time, x, y, item_vnum, item_uid, item_count, success) "
 			"VALUES(%u, NOW(), %u, %u, %u, %u, %d, %d)",
 			get_table_postfix(), dwPID, x, y, item_vnum, item_uid, item_count, success?1:0);
 }
@@ -188,7 +188,7 @@ void LogManager::SpeedHackLog(DWORD pid, DWORD x, DWORD y, int hack_count)
 
 void LogManager::ChangeNameLog(DWORD pid, const char *old_name, const char *new_name, const char *ip)
 {
-	Query("INSERT DELAYED INTO change_name%s (pid, old_name, new_name, time, ip) "
+	Query("INSERT INTO change_name%s (pid, old_name, new_name, time, ip) "
 			"VALUES(%u, '%s', '%s', NOW(), '%s') ",
 			get_table_postfix(), pid, old_name, new_name, ip);
 }
@@ -197,7 +197,7 @@ void LogManager::GMCommandLog(DWORD dwPID, const char* szName, const char* szIP,
 {
 	m_sql.EscapeString(__escape_hint, sizeof(__escape_hint), szCommand, strlen(szCommand));
 
-	Query("INSERT DELAYED INTO command_log%s (userid, server, ip, port, username, command, date ) "
+	Query("INSERT INTO command_log%s (userid, server, ip, port, username, command, date ) "
 			"VALUES(%u, 999, '%s', %u, '%s', '%s', NOW()) ",
 			get_table_postfix(), dwPID, szIP, byChannel, szName, __escape_hint);
 }
