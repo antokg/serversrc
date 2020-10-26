@@ -465,6 +465,11 @@ bool CItem::CanUsedBy(LPCHARACTER ch)
 			if (GetAntiFlag() & ITEM_ANTIFLAG_SURA)
 				return false;
 			break;
+			
+		case JOB_WOLFMAN:
+			if (GetAntiFlag() & ITEM_ANTIFLAG_WOLFMAN)
+				return false;
+			break;
 	}
 
 	return true;

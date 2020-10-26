@@ -350,6 +350,10 @@ bool RaceToJob(unsigned race, unsigned* ret_job)
 		case MAIN_RACE_SHAMAN_W:
 			*ret_job = JOB_SHAMAN;
 			break;
+			
+		case MAIN_RACE_WOLFMAN_M:
+			*ret_job = JOB_WOLFMAN;
+			break;
 
 		default:
 			return false;

@@ -498,6 +498,8 @@ void CClientManager::QUERY_LOGOUT(CPeer * peer, DWORD dwHandle,const char * data
 
 void CClientManager::QUERY_CHANGE_NAME(CPeer * peer, DWORD dwHandle, TPacketGDChangeName * p)
 {
+	
+	sys_err("name %s pid %d", p->name, p->pid);
 	char queryStr[QUERY_MAX_LEN];
 
 	if (g_stLocale == "sjis")

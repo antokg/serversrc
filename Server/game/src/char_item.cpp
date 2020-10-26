@@ -7489,6 +7489,11 @@ bool CHARACTER::CanEquipNow(const LPITEM item, const TItemPos& srcCell, const TI
 			if (item->GetAntiFlag() & ITEM_ANTIFLAG_SURA)
 				return false;
 			break;
+			
+		case JOB_WOLFMAN:
+			if (item->GetAntiFlag() & ITEM_ANTIFLAG_WOLFMAN)
+				return false;
+			break;
 	}
 
 	for (int i = 0; i < ITEM_LIMIT_MAX_NUM; ++i)

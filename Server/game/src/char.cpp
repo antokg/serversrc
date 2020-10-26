@@ -1619,6 +1619,10 @@ bool CHARACTER::ChangeSex()
 		case MAIN_RACE_SHAMAN_W:
 			m_points.job = MAIN_RACE_SHAMAN_M;
 			break;
+			
+		case MAIN_RACE_WOLFMAN_M:
+			sys_err("CHANGE_SEX: wolfman cannot change sex %s", GetName());
+			return false;
 
 		default:
 			sys_err("CHANGE_SEX: %s unknown race %d", GetName(), src_race);
@@ -2074,6 +2078,10 @@ void CHARACTER::ComputeBattlePoints()
 
 			case JOB_SHAMAN:
 				iStatAtk = (4 * GetPoint(POINT_ST) + 2 * GetPoint(POINT_IQ)) / 3;
+				break;
+				
+			case JOB_WOLFMAN:
+				iStatAtk = (2 * GetPoint(POINT_HT));
 				break;
 
 			default:
@@ -6831,6 +6839,7 @@ ESex GET_SEX(LPCHARACTER ch)
 		case MAIN_RACE_SURA_M:
 		case MAIN_RACE_ASSASSIN_M:
 		case MAIN_RACE_SHAMAN_M:
+		case MAIN_RACE_WOLFMAN_M:
 			return SEX_MALE;
 
 		case MAIN_RACE_ASSASSIN_W:

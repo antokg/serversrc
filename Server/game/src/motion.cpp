@@ -6,6 +6,9 @@
 #include "mob_manager.h"
 #include "char.h"
 
+// TODO refactor this
+extern bool RaceToJob(unsigned race, unsigned *ret_job);
+
 // POLYMORPH_BUG_FIX
 static float MSA_GetNormalAttackDuration(const char* msaPath)
 {
@@ -138,10 +141,18 @@ static void LoadMotion(CMotionSet* pMotionSet, TMobTable* mob_table, EPublicMoti
 	{
 		return;
 	}
+	
+	std::string strFileName = cpFileName;
+	
+	for(auto& c : strFileName)
+	{
+		c = tolower(c);
+	}
+
 
 	CMotion* pMotion = M2_NEW CMotion;
 
-	if (pMotion->LoadFromFile(cpFileName) == true)
+	if (pMotion->LoadFromFile(strFileName.c_str()) == true)
 	{
 		if (motion == MOTION_RUN)
 			if (0.0f == pMotion->GetAccumVector().y)
@@ -258,6 +269,8 @@ enum EMotionEventType
 	MOTION_EVENT_TYPE_CHARACTER_HIDE,		// 8
 	MOTION_EVENT_TYPE_WARP,					// 9
 	MOTION_EVENT_TYPE_EFFECT_TO_TARGET,		// 10
+	MOTION_EVENT_TYPE_NEW_1,
+	MOTION_EVENT_TYPE_NEW_2,
 	MOTION_EVENT_TYPE_MAX_NUM,				// 11
 };
 
@@ -272,11 +285,15 @@ bool CMotionManager::Build()
 		"data/pc2/warrior",
 		"data/pc2/assassin",
 		"data/pc2/sura",
-		"data/pc2/shaman"
+		"data/pc2/shaman",
+		"data/pc3/wolfman",
 	};
 	
 	for (int i = 0; i < MAIN_RACE_MAX_NUM; ++i)
 	{
+		unsigned job;
+		RaceToJob(i, &job);
+		
 		CMotionSet * pkMotionSet = M2_NEW CMotionSet;
 		m_map_pkMotionSet.insert(TContainer::value_type(i, pkMotionSet));
 
@@ -286,36 +303,56 @@ bool CMotionManager::Build()
 		pkMotionSet->Load(sz, MOTION_MODE_GENERAL, MOTION_RUN);
 		snprintf(sz, sizeof(sz), "%s/general/walk.msa", c_apszFolderName[i]);
 		pkMotionSet->Load(sz, MOTION_MODE_GENERAL, MOTION_WALK);
+		
+		if (job == JOB_WARRIOR)
+		{
+			snprintf(sz, sizeof(sz), "%s/twohand_sword/run.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_TWOHAND_SWORD, MOTION_RUN);
+			snprintf(sz, sizeof(sz), "%s/twohand_sword/walk.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_TWOHAND_SWORD, MOTION_WALK);
+		}
 
-		snprintf(sz, sizeof(sz), "%s/twohand_sword/run.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_TWOHAND_SWORD, MOTION_RUN);
-		snprintf(sz, sizeof(sz), "%s/twohand_sword/walk.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_TWOHAND_SWORD, MOTION_WALK);
+		if (job == JOB_WARRIOR || job == JOB_ASSASSIN || job == JOB_SURA)
+		{
+			snprintf(sz, sizeof(sz), "%s/onehand_sword/run.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_ONEHAND_SWORD, MOTION_RUN);
+			snprintf(sz, sizeof(sz), "%s/onehand_sword/walk.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_ONEHAND_SWORD, MOTION_WALK);
+		}
+		
+		if (job == JOB_ASSASSIN)
+		{
+			snprintf(sz, sizeof(sz), "%s/dualhand_sword/run.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_DUALHAND_SWORD, MOTION_RUN);
+			snprintf(sz, sizeof(sz), "%s/dualhand_sword/walk.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_DUALHAND_SWORD, MOTION_WALK);
 
-		snprintf(sz, sizeof(sz), "%s/onehand_sword/run.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_ONEHAND_SWORD, MOTION_RUN);
-		snprintf(sz, sizeof(sz), "%s/onehand_sword/walk.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_ONEHAND_SWORD, MOTION_WALK);
+			snprintf(sz, sizeof(sz), "%s/bow/run.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_BOW, MOTION_RUN);
+			snprintf(sz, sizeof(sz), "%s/bow/walk.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_BOW, MOTION_WALK);
+		}
 
-		snprintf(sz, sizeof(sz), "%s/dualhand_sword/run.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_DUALHAND_SWORD, MOTION_RUN);
-		snprintf(sz, sizeof(sz), "%s/dualhand_sword/walk.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_DUALHAND_SWORD, MOTION_WALK);
+		if (job == JOB_SHAMAN)
+		{
+			snprintf(sz, sizeof(sz), "%s/bell/run.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_BELL, MOTION_RUN);
+			snprintf(sz, sizeof(sz), "%s/bell/walk.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_BELL, MOTION_WALK);
 
-		snprintf(sz, sizeof(sz), "%s/bow/run.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_BOW, MOTION_RUN);
-		snprintf(sz, sizeof(sz), "%s/bow/walk.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_BOW, MOTION_WALK);
-
-		snprintf(sz, sizeof(sz), "%s/bell/run.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_BELL, MOTION_RUN);
-		snprintf(sz, sizeof(sz), "%s/bell/walk.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_BELL, MOTION_WALK);
-
-		snprintf(sz, sizeof(sz), "%s/fan/run.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_FAN, MOTION_RUN);
-		snprintf(sz, sizeof(sz), "%s/fan/walk.msa", c_apszFolderName[i]);
-		pkMotionSet->Load(sz, MOTION_MODE_FAN, MOTION_WALK);
+			snprintf(sz, sizeof(sz), "%s/fan/run.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_FAN, MOTION_RUN);
+			snprintf(sz, sizeof(sz), "%s/fan/walk.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_FAN, MOTION_WALK);
+		}
+		
+		if (job == JOB_WOLFMAN)
+		{
+			snprintf(sz, sizeof(sz), "%s/claw/run.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_CLAW, MOTION_RUN);
+			snprintf(sz, sizeof(sz), "%s/claw/walk.msa", c_apszFolderName[i]);
+			pkMotionSet->Load(sz, MOTION_MODE_CLAW, MOTION_WALK);
+		}
 
 		snprintf(sz, sizeof(sz), "%s/horse/run.msa", c_apszFolderName[i]);
 		pkMotionSet->Load(sz, MOTION_MODE_HORSE, MOTION_RUN);
@@ -472,6 +509,8 @@ bool CMotion::LoadMobSkillFromFile(const char * c_pszFileName, CMob* pMob, int i
 					case MOTION_EVENT_TYPE_CHARACTER_HIDE:
 					case MOTION_EVENT_TYPE_WARP:
 					case MOTION_EVENT_TYPE_EFFECT_TO_TARGET:
+					case MOTION_EVENT_TYPE_NEW_1:
+					case MOTION_EVENT_TYPE_NEW_2:
 						rkTextFileLoader.SetParentNode();
 						continue;
 
