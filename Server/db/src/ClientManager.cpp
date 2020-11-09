@@ -2048,8 +2048,6 @@ void CClientManager::ProcessPackets(CPeer * peer)
 			if (HEADER_GD_BLOCK_COUNTRY_IP == header)
 				sys_log(0, "recved : HEADER_GD_BLOCK_COUNTRY_IP");
 		}
-		
-		sys_err("%d", header);
 
 		switch (header)
 		{

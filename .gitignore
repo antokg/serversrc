@@ -1,15 +1,5 @@
-*.o
-game_*
-db_*
-Depend
-*.bak
 libgame.a
-liblua.a
-liblualib.a
 libpoly.a
 libsql.a
 libthecore.a
-OBJDIR
-.obj
-limit_time.h
-
+build
